@@ -9,6 +9,11 @@
       <html outputDirectory="./test/coverage" lowUpperBound="83" highLowerBound="95"/>
     </report>
   </coverage>
+  <groups>
+    <exclude>
+      <group>deadish</group>
+    </exclude>
+  </groups>
   <testsuites>
     <testsuite name="Unit-Tests">
       <directory>./test</directory>

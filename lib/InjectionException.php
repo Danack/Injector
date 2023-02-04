@@ -14,42 +14,6 @@ class InjectionException extends InjectorException
         parent::__construct($message, $code, $previous);
     }
 
-    public static function fromInvalidDefineParamsNotArray($definition, array $inProgressMakes): self
-    {
-        $message = sprintf(
-            Injector::M_INVALID_DEFINE_ARGUMENT_NOT_ARRAY,
-            gettype($definition)
-        );
-
-        return new self(
-            $inProgressMakes,
-            $message,
-            Injector::E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY
-        );
-    }
-
-    public static function fromInvalidDefineParamsBadKeys($definition, array $inProgressMakes)
-    {
-        $missingKeys = [];
-        if (!isset($definition[0])) {
-            $missingKeys[] = "array key 0 not set";
-        }
-        if (!isset($definition[1])) {
-            $missingKeys[] = "array key 1 not set";
-        }
-
-        $message = sprintf(
-            Injector::M_INVALID_DEFINE_ARGUMENT_BAD_KEYS,
-            implode(" ", $missingKeys)
-        );
-
-        return new self(
-            $inProgressMakes,
-            $message,
-            Injector::E_INVALID_DEFINE_ARGUMENT_BAD_KEYS
-        );
-    }
-
     /**
      * If PHP had package based privacy rules, this could be package private
      * or this could be 'just' a function.
