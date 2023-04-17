@@ -54,7 +54,7 @@ class ExecuteBench
     /**
      * @Revs(10000)
      */
-    public function benchinvoke_with_named_parameters()
+    public function disable_benchinvoke_with_named_parameters()
     {
         $this->injector->execute(array($this->noop, 'namedNoop'), array(':name' => 'foo'));
     }
