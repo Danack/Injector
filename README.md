@@ -1,11 +1,11 @@
-# auryn [![Build Status](https://github.com/rdlowrey/Auryn/actions/workflows/ci.yml/badge.svg?branch=adding_ci)](https://github.com/rdlowrey/Auryn/actions)
+# Danack/Injector [![Build Status](https://github.com/danack/injector/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/danack/injector/actions)
 
-auryn is a recursive dependency injector. Use auryn to bootstrap and wire together
+Danack/Injector is a recursive dependency injector. Use it to bootstrap and wire together
 S.O.L.I.D., object-oriented PHP applications.
 
-## Maintenance status
+## Other forks
 
-`rdlowrey/auryn` is in low maintenance mode. i.e. new features are very unlikely to be added, and
+The original library, `rdlowrey/auryn` is in low maintenance mode. i.e. new features are very unlikely to be added, and
 new releases to support new versions of PHP are not guaranteed to be timely. Notes on why some
 features were not added to Auryn are listed [here](excluded_features.md).
 
