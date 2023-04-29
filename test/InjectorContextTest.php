@@ -1,9 +1,9 @@
 <?php
 
-namespace Auryn\Test;
+namespace DI\Test;
 
-use Auryn\InjectionException;
-use Auryn\Injector;
+use DI\InjectionException;
+use DI\Injector;
 
 class InjectorContextTest extends BaseTest
 {
@@ -11,7 +11,7 @@ class InjectorContextTest extends BaseTest
     {
         $injector = new Injector();
         $next_injector = $injector->separateContext();
-        $this->assertEquals(new TestNoConstructor, $next_injector->make('Auryn\Test\TestNoConstructor'));
+        $this->assertEquals(new TestNoConstructor, $next_injector->make('DI\Test\TestNoConstructor'));
     }
 
     public function testSeparationWorks_with_shared_interface()
@@ -61,7 +61,7 @@ class InjectorContextTest extends BaseTest
         try {
             $injector->make(SharedClassInInjector::class);
         }
-        catch (\Auryn\InjectionException $ie) {
+        catch (\DI\InjectionException $ie) {
             $this->assertStringMatchesFormat(Injector::M_UNDEFINED_PARAM, $ie->getMessage());
             $this->assertSame(Injector::E_UNDEFINED_PARAM, $ie->getCode());
         }
@@ -69,7 +69,7 @@ class InjectorContextTest extends BaseTest
         try {
             $next_injector->make(SharedClassInInjector::class);
         }
-        catch (\Auryn\InjectionException $ie) {
+        catch (\DI\InjectionException $ie) {
             $this->assertStringMatchesFormat(
                 Injector::M_SHARED_CONTEXT_FAILED,
                 $ie->getMessage()

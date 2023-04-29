@@ -4,9 +4,6 @@ namespace DI;
 
 class Injector
 {
-    const A_RAW = ':';
-    const A_DELEGATE = '+';
-    const A_DEFINE = '@';
     const I_BINDINGS = 1;
     const I_DELEGATES = 2;
     const I_PREPARES = 4;
@@ -421,7 +418,7 @@ class Injector
             if (isset($this->delegates[$normalizedClass])) {
                 $executable = $this->buildExecutable($this->delegates[$normalizedClass]);
                 $reflectionFunction = $executable->getCallableReflection();
-                $args = $this->provisionFuncArgs($reflectionFunction, $args, null, $className);
+                $args = $this->provisionFuncArgsSimple($reflectionFunction, $className);
                 $obj = call_user_func_array(array($executable, '__invoke'), $args);
                 if (!($obj instanceof $normalizedClass)) {
                     throw new InjectionException(
@@ -471,7 +468,7 @@ class Injector
                 $definition = isset($this->classDefinitions[$normalizedClass])
                     ? array_replace($this->classDefinitions[$normalizedClass], $definition)
                     : $definition;
-                $args = $this->provisionFuncArgs($ctor, $definition, $ctorParams, $className);
+                $args = $this->provisionFuncArgs($ctor, $definition, $ctorParams/*, $className*/);
                 $obj = $reflClass->newInstanceArgs($args);
             } else {
                 $obj = $this->instantiateWithoutCtorParams($className);
@@ -504,36 +501,14 @@ class Injector
         return new $className;
     }
 
-    private function provisionFuncArgs(\ReflectionFunctionAbstract $reflFunc, array $definition, array $reflParams = null, $className = null)
+    private function provisionFuncArgsSimple(\ReflectionFunctionAbstract $reflFunc)
     {
         $args = array();
-
-        // @TODO store this in ReflectionStorage
-        if (!isset($reflParams)) {
-            $reflParams = $reflFunc->getParameters();
-        }
+        $reflParams = $reflFunc->getParameters();
 
         foreach ($reflParams as $i => $reflParam) {
-            $name = $reflParam->name;
-
-            if (isset($definition[$i]) || array_key_exists($i, $definition)) {
-                // indexed arguments take precedence over named parameters
-                $arg = $definition[$i];
-            } elseif (isset($definition[$name]) || array_key_exists($name, $definition)) {
-                // interpret the param as a class name to be instantiated
-                $arg = $this->make($definition[$name]);
-            } elseif (($prefix = self::A_RAW . $name) && (isset($definition[$prefix]) || array_key_exists($prefix, $definition))) {
-                // interpret the param as a raw value to be injected
-                $arg = $definition[$prefix];
-            } elseif (($prefix = self::A_DELEGATE . $name) && isset($definition[$prefix])) {
-                // interpret the param as an invokable delegate
-                $arg = $this->buildArgFromDelegate($name, $definition[$prefix]);
-            } elseif (($prefix = self::A_DEFINE . $name) && isset($definition[$prefix])) {
-                // interpret the param as a class definition
-                $arg = $this->buildArgFromParamDefineArr($definition[$prefix]);
-            } elseif (!$arg = $this->buildArgFromType($reflFunc, $reflParam)) {
-                $arg = $this->buildArgFromReflParam($reflParam, $className);
-
+            if (!$arg = $this->buildArgFromType($reflFunc, $reflParam)) {
+                $arg = $this->buildArgFromReflParam($reflParam/*, $className*/);
                 if ($arg === null && ($reflParam->isVariadic() || $reflParam->isOptional())) {
                     // buildArgFromReflParam might return null in case the parameter is optional
                     // in case of variadics, the parameter is optional, but null might not be allowed
@@ -547,39 +522,39 @@ class Injector
         return $args;
     }
 
-    private function buildArgFromParamDefineArr($definition)
-    {
-        if (!is_array($definition)) {
-            throw InjectionException::fromInvalidDefineParamsNotArray(
-                $definition,
-                $this->inProgressMakes
-            );
+    private function provisionFuncArgs(
+        \ReflectionFunctionAbstract $reflFunc,
+        array $definition,
+        array $reflParams = null,
+        $className = null
+    ) {
+        $args = array();
+
+        // @TODO store this in ReflectionStorage
+        if (!isset($reflParams)) {
+            $reflParams = $reflFunc->getParameters();
         }
 
-        if (!isset($definition[0], $definition[1])) {
-            throw InjectionException::fromInvalidDefineParamsBadKeys(
-                $definition,
-                $this->inProgressMakes
-            );
+        foreach ($reflParams as $i => $reflParam) {
+            $name = $reflParam->name;
+
+            if (isset($definition[$name]) || array_key_exists($name, $definition)) {
+                // interpret the param as a class name to be instantiated
+                $arg = $this->make($definition[$name]);
+            } elseif (!$arg = $this->buildArgFromType($reflFunc, $reflParam)) {
+                $arg = $this->buildArgFromReflParam($reflParam/*, $className*/);
+
+                if ($arg === null && (PHP_VERSION_ID >= 50600 && $reflParam->isVariadic() || $reflParam->isOptional())) {
+                    // buildArgFromReflParam might return null in case the parameter is optional
+                    // in case of variadics, the parameter is optional, but null might not be allowed
+                    continue;
+                }
+            }
+
+            $args[] = $arg;
         }
 
-        list($class, $definition) = $definition;
-
-        return $this->make($class, $definition);
-    }
-
-    private function buildArgFromDelegate($paramName, $callableOrMethodStr)
-    {
-        if ($this->isExecutable($callableOrMethodStr) === false) {
-            throw InjectionException::fromInvalidCallable(
-                $this->inProgressMakes,
-                $callableOrMethodStr
-            );
-        }
-
-        $executable = $this->buildExecutable($callableOrMethodStr);
-
-        return $executable($paramName, $this);
+        return $args;
     }
 
     private function buildArgFromType(\ReflectionFunctionAbstract $reflFunc, \ReflectionParameter $reflParam)
@@ -605,7 +580,7 @@ class Injector
         return $obj;
     }
 
-    private function buildArgFromReflParam(\ReflectionParameter $reflParam, $className = null)
+    private function buildArgFromReflParam(\ReflectionParameter $reflParam/*, $className = null*/)
     {
         if (array_key_exists($reflParam->name, $this->paramDefinitions)) {
             $arg = $this->paramDefinitions[$reflParam->name];
@@ -622,8 +597,10 @@ class Injector
                 ? " declared in " . $reflFunc->getDeclaringClass()->name . "::"
                 : "";
             $classWord = ($reflFunc instanceof \ReflectionMethod)
-                ? $className . '::'
+//                ? $className . '::'
+                ? $reflFunc->getDeclaringClass()->getName() . '::'
                 : '';
+
             $funcWord = $classWord . $reflFunc->name;
 
             throw new InjectionException(
@@ -681,11 +658,12 @@ class Injector
      * @return mixed Returns the invocation result returned from calling the generated executable
      *@throws \DI\InjectionException
      */
-    public function execute($callableOrMethodStr, array $args = array())
+    public function execute($callableOrMethodStr)
     {
         list($reflFunc, $invocationObj) = $this->buildExecutableStruct($callableOrMethodStr);
         $executable = new Executable($reflFunc, $invocationObj);
-        $args = $this->provisionFuncArgs($reflFunc, $args, null, $invocationObj === null ? null : get_class($invocationObj));
+
+        $args = $this->provisionFuncArgsSimple($reflFunc/*, $invocationObj === null ? null : get_class($invocationObj)*/);
 
         return call_user_func_array(array($executable, '__invoke'), $args);
     }
