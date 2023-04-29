@@ -1,14 +1,14 @@
 <?php
 
-namespace Auryn;
+namespace DI;
 
 class CachingReflector implements Reflector
 {
-    const CACHE_KEY_CLASSES = 'auryn.refls.classes.';
-    const CACHE_KEY_CTORS = 'auryn.refls.ctors.';
-    const CACHE_KEY_CTOR_PARAMS = 'auryn.refls.ctor-params.';
-    const CACHE_KEY_FUNCS = 'auryn.refls.funcs.';
-    const CACHE_KEY_METHODS = 'auryn.refls.methods.';
+    const CACHE_KEY_CLASSES = 'danackdi.refls.classes.';
+    const CACHE_KEY_CTORS = 'danackdi.refls.ctors.';
+    const CACHE_KEY_CTOR_PARAMS = 'danackdi.refls.ctor-params.';
+    const CACHE_KEY_FUNCS = 'danackdi.refls.funcs.';
+    const CACHE_KEY_METHODS = 'danackdi.refls.methods.';
 
     private $reflector;
     private $cache;

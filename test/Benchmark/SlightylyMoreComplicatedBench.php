@@ -1,8 +1,8 @@
 <?php
 
-namespace Auryn\Test\Benchmark;
+namespace DI\Test\Benchmark;
 
-use Auryn\Injector;
+use DI\Injector;
 
 class SlightylyMoreComplicatedBench
 {
@@ -14,7 +14,7 @@ class SlightylyMoreComplicatedBench
 
         $this->injector->delegate(
             DelegatedClass::class,
-            [\Auryn\Test\Benchmark\DelegatedClass::class, 'create']
+            [\DI\Test\Benchmark\DelegatedClass::class, 'create']
         );
         $this->injector->alias(
             AliasedInterface::class,

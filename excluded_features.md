@@ -252,7 +252,7 @@ class Bar extends Foo
 {
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->define('Foo', [
     ':key' => 'secret',
 ]);
@@ -261,7 +261,7 @@ $foo_object = $injector->make(Foo::class);
 $bar_object = $injector->make(Bar::class);
 
 // Gives error:
-// Uncaught Auryn\InjectionException: No definition available to provision
+// Uncaught DI\InjectionException: No definition available to provision
 // typeless parameter $key at position 0 in Bar::__construct() declared in...
 ```
 
@@ -306,7 +306,7 @@ class Bar extends Foo
 {
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->share(new ApiKey('secret'));
 
 $foo_object = $injector->make(Foo::class);
@@ -334,7 +334,7 @@ $injector->share($b);
 $injector->make(C::class);
 
 // Gives error:
-// Uncaught Auryn\InjectionException: Injection definition required for interface A in...
+// Uncaught DI\InjectionException: Injection definition required for interface A in...
 ```
 
 ### Alternative solutions

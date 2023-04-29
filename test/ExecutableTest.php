@@ -1,12 +1,12 @@
 <?php
 
-namespace Auryn\Test;
+namespace DI\Test;
 
-namespace Auryn\Test;
+namespace DI\Test;
 
-use Auryn\Executable;
-use Auryn\Injector;
-use Auryn\Test\ExecutableHelper;
+use DI\Executable;
+use DI\Injector;
+use DI\Test\ExecutableHelper;
 use PHPUnit\Framework\TestCase;
 
 class ExecutableTest extends TestCase

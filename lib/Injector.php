@@ -1,6 +1,6 @@
 <?php
 
-namespace Auryn;
+namespace DI;
 
 class Injector
 {
@@ -643,8 +643,8 @@ class Injector
      *
      * @param mixed $callableOrMethodStr A valid PHP callable or a provisionable ClassName::methodName string
      * @param array $args Optional array specifying params with which to invoke the provisioned callable
-     * @throws \Auryn\InjectionException
      * @return mixed Returns the invocation result returned from calling the generated executable
+     *@throws \DI\InjectionException
      */
     public function execute($callableOrMethodStr, array $args = array())
     {
@@ -659,7 +659,7 @@ class Injector
      * Provision an Executable instance from any valid callable or class::method string
      *
      * @param mixed $callableOrMethodStr A valid PHP callable or a provisionable ClassName::methodName string
-     * @return \Auryn\Executable
+     * @return \DI\Executable
      */
     public function buildExecutable($callableOrMethodStr)
     {

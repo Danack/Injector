@@ -1,6 +1,6 @@
 <?php
 
-namespace Auryn;
+namespace DI;
 
 class ReflectionCacheArray implements ReflectionCache
 {

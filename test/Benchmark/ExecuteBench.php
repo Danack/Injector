@@ -1,8 +1,8 @@
 <?php
 
-namespace Auryn\Test\Benchmark;
+namespace DI\Test\Benchmark;
 
-use Auryn\Injector;
+use DI\Injector;
 
 class ExecuteBench
 {

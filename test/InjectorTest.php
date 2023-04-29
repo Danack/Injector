@@ -1,8 +1,8 @@
 <?php
 
-namespace Auryn\Test;
+namespace DI\Test;
 
-use Auryn\Injector;
+use DI\Injector;
 
 class InjectorTest extends BaseTest
 {
@@ -10,61 +10,61 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector;
         $injector->defineParam('parameter', []);
-        $injector->execute('Auryn\Test\hasArrayDependency');
+        $injector->execute('DI\Test\hasArrayDependency');
     }
 
     public function testMakeInstanceInjectsSimpleConcreteDependency()
     {
         $injector = new Injector;
         $this->assertEquals(new TestNeedsDep(new TestDependency),
-            $injector->make('Auryn\Test\TestNeedsDep')
+            $injector->make('DI\Test\TestNeedsDep')
         );
     }
 
     public function testMakeInstanceReturnsNewInstanceIfClassHasNoConstructor()
     {
         $injector = new Injector;
-        $this->assertEquals(new TestNoConstructor, $injector->make('Auryn\Test\TestNoConstructor'));
+        $this->assertEquals(new TestNoConstructor, $injector->make('DI\Test\TestNoConstructor'));
     }
 
     public function testMakeInstanceReturnsAliasInstanceOnNonConcreteType()
     {
         $injector = new Injector;
-        $injector->alias('Auryn\Test\DepInterface', 'Auryn\Test\DepImplementation');
-        $this->assertEquals(new DepImplementation, $injector->make('Auryn\Test\DepInterface'));
+        $injector->alias('DI\Test\DepInterface', 'DI\Test\DepImplementation');
+        $this->assertEquals(new DepImplementation, $injector->make('DI\Test\DepInterface'));
     }
 
     public function testMakeInstanceThrowsExceptionOnInterfaceWithoutAlias()
     {
-        $this->expectException(\Auryn\InjectionException::class);
-        $this->expectExceptionMessage("Injection definition required for interface Auryn\Test\DepInterface");
-        $this->expectExceptionCode(\Auryn\Injector::E_NEEDS_DEFINITION);
+        $this->expectException(\DI\InjectionException::class);
+        $this->expectExceptionMessage("Injection definition required for interface DI\Test\DepInterface");
+        $this->expectExceptionCode(\DI\Injector::E_NEEDS_DEFINITION);
         $injector = new Injector;
-        $injector->make('Auryn\Test\DepInterface');
+        $injector->make('DI\Test\DepInterface');
     }
 
     public function testMakeInstanceThrowsExceptionOnNonConcreteCtorParamWithoutImplementation()
     {
-        $this->expectException(\Auryn\InjectionException::class);
-        $this->expectExceptionMessage("Injection definition required for interface Auryn\Test\DepInterface");
-        $this->expectExceptionCode(\Auryn\Injector::E_NEEDS_DEFINITION);
+        $this->expectException(\DI\InjectionException::class);
+        $this->expectExceptionMessage("Injection definition required for interface DI\Test\DepInterface");
+        $this->expectExceptionCode(\DI\Injector::E_NEEDS_DEFINITION);
 
         $injector = new Injector;
-        $injector->make('Auryn\Test\RequiresInterface');
+        $injector->make('DI\Test\RequiresInterface');
     }
 
     public function testMakeInstanceBuildsNonConcreteCtorParamWithAlias()
     {
         $injector = new Injector;
-        $injector->alias('Auryn\Test\DepInterface', 'Auryn\Test\DepImplementation');
-        $obj = $injector->make('Auryn\Test\RequiresInterface');
-        $this->assertInstanceOf('Auryn\Test\RequiresInterface', $obj);
+        $injector->alias('DI\Test\DepInterface', 'DI\Test\DepImplementation');
+        $obj = $injector->make('DI\Test\RequiresInterface');
+        $this->assertInstanceOf('DI\Test\RequiresInterface', $obj);
     }
 
     public function testMakeInstancePassesNullCtorParameterIfNoTypeOrDefaultCanBeDetermined()
     {
         $injector = new Injector;
-        $nullCtorParamObj = $injector->make('Auryn\Test\ProvTestNoDefinitionNullDefaultClass');
+        $nullCtorParamObj = $injector->make('DI\Test\ProvTestNoDefinitionNullDefaultClass');
         $this->assertEquals(new ProvTestNoDefinitionNullDefaultClass, $nullCtorParamObj);
         $this->assertNull($nullCtorParamObj->arg);
     }
@@ -72,14 +72,14 @@ class InjectorTest extends BaseTest
     public function testMakeInstanceReturnsSharedInstanceIfAvailable()
     {
         $injector = new Injector;
-        $injector->define('Auryn\Test\RequiresInterface', array('dep' => 'Auryn\Test\DepImplementation'));
-        $injector->share('Auryn\Test\RequiresInterface');
-        $injected = $injector->make('Auryn\Test\RequiresInterface');
+        $injector->define('DI\Test\RequiresInterface', array('dep' => 'DI\Test\DepImplementation'));
+        $injector->share('DI\Test\RequiresInterface');
+        $injected = $injector->make('DI\Test\RequiresInterface');
 
         $this->assertEquals('something', $injected->testDep->testProp);
         $injected->testDep->testProp = 'something else';
 
-        $injected2 = $injector->make('Auryn\Test\RequiresInterface');
+        $injected2 = $injector->make('DI\Test\RequiresInterface');
         $this->assertEquals('something else', $injected2->testDep->testProp);
     }
 
@@ -90,7 +90,7 @@ class InjectorTest extends BaseTest
             $classname = "\"" . $classname . "\"";
         }
 
-        $this->expectException(\Auryn\InjectorException::class);
+        $this->expectException(\DI\InjectorException::class);
         $this->expectExceptionMessage("Could not make ClassThatDoesntExist: Class $classname does not exist");
 
         $injector = new Injector;
@@ -100,16 +100,16 @@ class InjectorTest extends BaseTest
     public function testMakeInstanceUsesCustomDefinitionIfSpecified()
     {
         $injector = new Injector;
-        $injector->define('Auryn\Test\TestNeedsDep', array('testDep'=>'Auryn\Test\TestDependency'));
-        $injected = $injector->make('Auryn\Test\TestNeedsDep', array('testDep'=>'Auryn\Test\TestDependency2'));
+        $injector->define('DI\Test\TestNeedsDep', array('testDep'=>'DI\Test\TestDependency'));
+        $injected = $injector->make('DI\Test\TestNeedsDep', array('testDep'=>'DI\Test\TestDependency2'));
         $this->assertEquals('testVal2', $injected->testDep->testProp);
     }
 
     public function testMakeInstanceCustomDefinitionOverridesExistingDefinitions()
     {
         $injector = new Injector;
-        $injector->define('Auryn\Test\InjectorTestChildClass', array(':arg1'=>'First argument', ':arg2'=>'Second argument'));
-        $injected = $injector->make('Auryn\Test\InjectorTestChildClass', array(':arg1'=>'Override'));
+        $injector->define('DI\Test\InjectorTestChildClass', array(':arg1'=>'First argument', ':arg2'=>'Second argument'));
+        $injected = $injector->make('DI\Test\InjectorTestChildClass', array(':arg1'=>'Override'));
         $this->assertEquals('Override', $injected->arg1);
         $this->assertEquals('Second argument', $injected->arg2);
     }
@@ -117,20 +117,20 @@ class InjectorTest extends BaseTest
     public function testMakeInstanceStoresShareIfMarkedWithNullInstance()
     {
         $injector = new Injector;
-        $injector->share('Auryn\Test\TestDependency');
-        $injector->make('Auryn\Test\TestDependency');
+        $injector->share('DI\Test\TestDependency');
+        $injector->make('DI\Test\TestDependency');
     }
 
     public function testMakeInstanceUsesReflectionForUnknownParamsInMultiBuildWithDeps()
     {
         $injector = new Injector;
-        $obj = $injector->make('Auryn\Test\TestMultiDepsWithCtor', array('val1'=>'Auryn\Test\TestDependency'));
-        $this->assertInstanceOf('Auryn\Test\TestMultiDepsWithCtor', $obj);
+        $obj = $injector->make('DI\Test\TestMultiDepsWithCtor', array('val1'=>'DI\Test\TestDependency'));
+        $this->assertInstanceOf('DI\Test\TestMultiDepsWithCtor', $obj);
 
-        $obj = $injector->make('Auryn\Test\NoTypeNoDefaultConstructorClass',
-            array('val1'=>'Auryn\Test\TestDependency')
+        $obj = $injector->make('DI\Test\NoTypeNoDefaultConstructorClass',
+            array('val1'=>'DI\Test\TestDependency')
         );
-        $this->assertInstanceOf('Auryn\Test\NoTypeNoDefaultConstructorClass', $obj);
+        $this->assertInstanceOf('DI\Test\NoTypeNoDefaultConstructorClass', $obj);
         $this->assertNull($obj->testParam);
     }
 
@@ -146,10 +146,10 @@ class InjectorTest extends BaseTest
         require_once __DIR__ . "/fixtures_5_6.php";
 
         $injector = new Injector;
-        $obj = $injector->make('Auryn\Test\NoTypeNoDefaultConstructorVariadicClass',
-            array('val1'=>'Auryn\Test\TestDependency')
+        $obj = $injector->make('DI\Test\NoTypeNoDefaultConstructorVariadicClass',
+            array('val1'=>'DI\Test\TestDependency')
         );
-        $this->assertInstanceOf('Auryn\Test\NoTypeNoDefaultConstructorVariadicClass', $obj);
+        $this->assertInstanceOf('DI\Test\NoTypeNoDefaultConstructorVariadicClass', $obj);
         $this->assertEquals(array(), $obj->testParam);
     }
 
@@ -165,52 +165,52 @@ class InjectorTest extends BaseTest
         require_once __DIR__ . "/fixtures_5_6.php";
 
         $injector = new Injector;
-        $obj = $injector->make('Auryn\Test\TypeNoDefaultConstructorVariadicClass',
-            array('arg'=>'Auryn\Test\TestDependency')
+        $obj = $injector->make('DI\Test\TypeNoDefaultConstructorVariadicClass',
+            array('arg'=>'DI\Test\TestDependency')
         );
-        $this->assertInstanceOf('Auryn\Test\TypeNoDefaultConstructorVariadicClass', $obj);
+        $this->assertInstanceOf('DI\Test\TypeNoDefaultConstructorVariadicClass', $obj);
         $this->assertIsArray($obj->testParam);
-        $this->assertInstanceOf('Auryn\Test\TestDependency', $obj->testParam[0]);
+        $this->assertInstanceOf('DI\Test\TestDependency', $obj->testParam[0]);
     }
 
     public function testMakeInstanceThrowsExceptionOnUntypedParameterWithoutDefinitionOrDefault()
     {
-        $this->expectException(\Auryn\InjectionException::class);
+        $this->expectException(\DI\InjectionException::class);
         // TODO - why does this message end with double-colon?
-        $this->expectExceptionMessage('No definition available to provision typeless parameter $val at position 0 in Auryn\Test\InjectorTestCtorParamWithNoTypeOrDefault::__construct() declared in Auryn\Test\InjectorTestCtorParamWithNoTypeOrDefault::');
-        $this->expectExceptionCode(\Auryn\Injector::E_UNDEFINED_PARAM);
+        $this->expectExceptionMessage('No definition available to provision typeless parameter $val at position 0 in DI\Test\InjectorTestCtorParamWithNoTypeOrDefault::__construct() declared in DI\Test\InjectorTestCtorParamWithNoTypeOrDefault::');
+        $this->expectExceptionCode(\DI\Injector::E_UNDEFINED_PARAM);
 
         $injector = new Injector;
-        $injector->make('Auryn\Test\InjectorTestCtorParamWithNoTypeOrDefault');
+        $injector->make('DI\Test\InjectorTestCtorParamWithNoTypeOrDefault');
     }
 
     public function testbuildArgFromReflParamCoverageNonClassCase()
     {
         $injector= new Injector;
 
-        $this->expectExceptionCode(\Auryn\Injector::E_UNDEFINED_PARAM);
-        $injector->execute('Auryn\Test\aFunctionWithAParam');
+        $this->expectExceptionCode(\DI\Injector::E_UNDEFINED_PARAM);
+        $injector->execute('DI\Test\aFunctionWithAParam');
     }
 
     public function testMakeInstanceThrowsExceptionOnUntypedParameterWithoutDefinitionOrDefaultThroughAliasedType()
     {
-        $this->expectException(\Auryn\InjectionException::class);
+        $this->expectException(\DI\InjectionException::class);
         // TODO - why does this message end with double-colon?
-        $this->expectExceptionMessage('No definition available to provision typeless parameter $val at position 0 in Auryn\Test\InjectorTestCtorParamWithNoTypeOrDefault::__construct() declared in Auryn\Test\InjectorTestCtorParamWithNoTypeOrDefault::');
-        $this->expectExceptionCode(\Auryn\Injector::E_UNDEFINED_PARAM);
+        $this->expectExceptionMessage('No definition available to provision typeless parameter $val at position 0 in DI\Test\InjectorTestCtorParamWithNoTypeOrDefault::__construct() declared in DI\Test\InjectorTestCtorParamWithNoTypeOrDefault::');
+        $this->expectExceptionCode(\DI\Injector::E_UNDEFINED_PARAM);
 
         $injector = new Injector;
-        $injector->alias('Auryn\Test\TestNoExplicitDefine', 'Auryn\Test\InjectorTestCtorParamWithNoTypeOrDefault');
-        $injector->make('Auryn\Test\InjectorTestCtorParamWithNoTypeOrDefaultDependent');
+        $injector->alias('DI\Test\TestNoExplicitDefine', 'DI\Test\InjectorTestCtorParamWithNoTypeOrDefault');
+        $injector->make('DI\Test\InjectorTestCtorParamWithNoTypeOrDefaultDependent');
     }
 
     public function testMakeInstanceThrowsExceptionOnUninstantiableTypeWithoutDefinition()
     {
-        $this->expectException(\Auryn\InjectorException::class);
-        $this->expectExceptionMessage("Injection definition required for interface Auryn\Test\DepInterface");
+        $this->expectException(\DI\InjectorException::class);
+        $this->expectExceptionMessage("Injection definition required for interface DI\Test\DepInterface");
 
         $injector = new Injector;
-        $injector->make('Auryn\Test\RequiresInterface');
+        $injector->make('DI\Test\RequiresInterface');
     }
 
     public function testTypelessDefineForDependency()
@@ -218,7 +218,7 @@ class InjectorTest extends BaseTest
         $thumbnailSize = 128;
         $injector = new Injector;
         $injector->defineParam('thumbnailSize', $thumbnailSize);
-        $testClass = $injector->make('Auryn\Test\RequiresDependencyWithTypelessParameters');
+        $testClass = $injector->make('DI\Test\RequiresDependencyWithTypelessParameters');
         $this->assertEquals($thumbnailSize, $testClass->getThumbnailSize(), 'Typeless define was not injected correctly.');
     }
 
@@ -227,14 +227,14 @@ class InjectorTest extends BaseTest
         $injector = new Injector;
         $injector->defineParam('val', 42);
 
-        $injector->alias('Auryn\Test\TestNoExplicitDefine', 'Auryn\Test\ProviderTestCtorParamWithNoTypeOrDefault');
-        $obj = $injector->make('Auryn\Test\ProviderTestCtorParamWithNoTypeOrDefaultDependent');
+        $injector->alias('DI\Test\TestNoExplicitDefine', 'DI\Test\ProviderTestCtorParamWithNoTypeOrDefault');
+        $obj = $injector->make('DI\Test\ProviderTestCtorParamWithNoTypeOrDefaultDependent');
     }
 
     public function testMakeInstanceInjectsRawParametersDirectly()
     {
         $injector = new Injector;
-        $injector->define('Auryn\Test\InjectorTestRawCtorParams', array(
+        $injector->define('DI\Test\InjectorTestRawCtorParams', array(
             ':string' => 'string',
             ':obj' => new \StdClass,
             ':int' => 42,
@@ -244,7 +244,7 @@ class InjectorTest extends BaseTest
             ':null' => null,
         ));
 
-        $obj = $injector->make('Auryn\Test\InjectorTestRawCtorParams');
+        $obj = $injector->make('DI\Test\InjectorTestRawCtorParams');
         $this->assertIsString($obj->string);
         $this->assertInstanceOf('StdClass', $obj->obj);
         $this->assertIsInt($obj->int);
@@ -259,7 +259,7 @@ class InjectorTest extends BaseTest
         $injector= new Injector;
 
         $callable = $this->createPartialMock(
-            'Auryn\test\CallableMock',
+            'DI\Test\CallableMock',
             array('__invoke')
         );
 
@@ -279,7 +279,7 @@ class InjectorTest extends BaseTest
     public function testMakeInstanceHandlesNamespacedClasses()
     {
         $injector = new Injector;
-        $injector->make('Auryn\Test\SomeClassName');
+        $injector->make('DI\Test\SomeClassName');
     }
 
     public function testMakeInstanceDelegate()
@@ -287,7 +287,7 @@ class InjectorTest extends BaseTest
         $injector= new Injector;
 
         $callable = $this->createPartialMock(
-            'Auryn\test\CallableMock',
+            'DI\Test\CallableMock',
             array('__invoke')
         );
 
@@ -295,17 +295,17 @@ class InjectorTest extends BaseTest
             ->method('__invoke')
             ->will($this->returnValue(new TestDependency()));
 
-        $injector->delegate('Auryn\Test\TestDependency', $callable);
+        $injector->delegate('DI\Test\TestDependency', $callable);
 
-        $obj = $injector->make('Auryn\Test\TestDependency');
+        $obj = $injector->make('DI\Test\TestDependency');
 
-        $this->assertInstanceOf('Auryn\Test\TestDependency', $obj);
+        $this->assertInstanceOf('DI\Test\TestDependency', $obj);
     }
 
     public function testMakeInstanceWithStringDelegate()
     {
         $injector= new Injector;
-        $injector->delegate('StdClass', 'Auryn\Test\StringStdClassDelegateMock');
+        $injector->delegate('StdClass', 'DI\Test\StringStdClassDelegateMock');
         $obj = $injector->make('StdClass');
         $this->assertEquals(42, $obj->test);
     }
@@ -314,16 +314,16 @@ class InjectorTest extends BaseTest
     {
         $injector= new Injector;
 
-        $this->expectException(\Auryn\ConfigException::class);
-        $this->expectExceptionMessage("Auryn\\Injector::delegate expects a valid callable or executable class::method string at Argument 2 but received 'StringDelegateWithNoInvokeMethod'");
+        $this->expectException(\DI\ConfigException::class);
+        $this->expectExceptionMessage("DI\\Injector::delegate expects a valid callable or executable class::method string at Argument 2 but received 'StringDelegateWithNoInvokeMethod'");
 
         $injector->delegate('StdClass', 'StringDelegateWithNoInvokeMethod');
     }
 
     public function testMakeInstanceThrowsExceptionIfStringDelegateClassInstantiationFails()
     {
-        $this->expectException(\Auryn\ConfigException::class);
-        $this->expectExceptionMessage("Auryn\\Injector::delegate expects a valid callable or executable class::method string at Argument 2 but received 'SomeClassThatDefinitelyDoesNotExistForReal'");
+        $this->expectException(\DI\ConfigException::class);
+        $this->expectExceptionMessage("DI\\Injector::delegate expects a valid callable or executable class::method string at Argument 2 but received 'SomeClassThatDefinitelyDoesNotExistForReal'");
 
         $injector= new Injector;
         $injector->delegate('StdClass', 'SomeClassThatDefinitelyDoesNotExistForReal');
@@ -331,19 +331,19 @@ class InjectorTest extends BaseTest
 
     public function testMakeInstanceThrowsExceptionOnUntypedParameterWithNoDefinition()
     {
-        $this->expectException(\Auryn\InjectionException::class);
-        $this->expectExceptionMessage('Injection definition required for interface Auryn\Test\DepInterface');
+        $this->expectException(\DI\InjectionException::class);
+        $this->expectExceptionMessage('Injection definition required for interface DI\Test\DepInterface');
 
         $injector = new Injector;
-        $injector->make('Auryn\Test\RequiresInterface');
+        $injector->make('DI\Test\RequiresInterface');
     }
 
     public function testDefineAssignsPassedDefinition()
     {
         $injector = new Injector;
-        $definition = array('dep' => 'Auryn\Test\DepImplementation');
-        $injector->define('Auryn\Test\RequiresInterface', $definition);
-        $this->assertInstanceOf('Auryn\Test\RequiresInterface', $injector->make('Auryn\Test\RequiresInterface'));
+        $definition = array('dep' => 'DI\Test\DepImplementation');
+        $injector->define('DI\Test\RequiresInterface', $definition);
+        $this->assertInstanceOf('DI\Test\RequiresInterface', $injector->make('DI\Test\RequiresInterface'));
     }
 
     public function testShareStoresSharedInstanceAndReturnsCurrentInstance()
@@ -352,7 +352,7 @@ class InjectorTest extends BaseTest
         $testShare = new \StdClass;
         $testShare->test = 42;
 
-        $this->assertInstanceOf('Auryn\Injector', $injector->share($testShare));
+        $this->assertInstanceOf('DI\Injector', $injector->share($testShare));
         $testShare->test = 'test';
         $this->assertEquals('test', $injector->make('stdclass')->test);
     }
@@ -360,13 +360,13 @@ class InjectorTest extends BaseTest
     public function testShareMarksClassSharedOnNullObjectParameter()
     {
         $injector = new Injector;
-        $this->assertInstanceOf('Auryn\Injector', $injector->share('SomeClass'));
+        $this->assertInstanceOf('DI\Injector', $injector->share('SomeClass'));
     }
 
     public function testShareThrowsExceptionOnInvalidArgument()
     {
-        $this->expectException(\Auryn\ConfigException::class);
-        $this->expectExceptionMessage('Auryn\Injector::share() requires a string class name or object instance at Argument 1; integer specified');
+        $this->expectException(\DI\ConfigException::class);
+        $this->expectExceptionMessage('DI\Injector::share() requires a string class name or object instance at Argument 1; integer specified');
 
         $injector = new Injector;
         $injector->share(42);
@@ -375,7 +375,7 @@ class InjectorTest extends BaseTest
     public function testAliasAssignsValueAndReturnsCurrentInstance()
     {
         $injector = new Injector;
-        $this->assertInstanceOf('Auryn\Injector', $injector->alias('DepInterface', 'Auryn\Test\DepImplementation'));
+        $this->assertInstanceOf('DI\Injector', $injector->alias('DepInterface', 'DI\Test\DepImplementation'));
     }
 
     public function provideInvalidDelegates()
@@ -392,39 +392,39 @@ class InjectorTest extends BaseTest
      */
     public function testDelegateThrowsExceptionIfDelegateIsNotCallableOrString($badDelegate)
     {
-        $this->expectException(\Auryn\ConfigException::class);
-        $this->expectExceptionMessage('Auryn\Injector::delegate expects a valid callable or executable class::method string at Argument 2');
+        $this->expectException(\DI\ConfigException::class);
+        $this->expectExceptionMessage('DI\Injector::delegate expects a valid callable or executable class::method string at Argument 2');
 
         $injector = new Injector;
-        $injector->delegate('Auryn\Test\TestDependency', $badDelegate);
+        $injector->delegate('DI\Test\TestDependency', $badDelegate);
     }
 
     public function testDelegateInstantiatesCallableClassString()
     {
         $injector = new Injector;
-        $injector->delegate('Auryn\Test\MadeByDelegate', 'Auryn\Test\CallableDelegateClassTest');
-        $this->assertInstanceof('Auryn\Test\MadeByDelegate', $injector->make('Auryn\Test\MadeByDelegate'));
+        $injector->delegate('DI\Test\MadeByDelegate', 'DI\Test\CallableDelegateClassTest');
+        $this->assertInstanceof('DI\Test\MadeByDelegate', $injector->make('DI\Test\MadeByDelegate'));
     }
 
     public function testDelegateInstantiatesCallableClassArray()
     {
         $injector = new Injector;
-        $injector->delegate('Auryn\Test\MadeByDelegate', array('Auryn\Test\CallableDelegateClassTest', '__invoke'));
-        $this->assertInstanceof('Auryn\Test\MadeByDelegate', $injector->make('Auryn\Test\MadeByDelegate'));
+        $injector->delegate('DI\Test\MadeByDelegate', array('DI\Test\CallableDelegateClassTest', '__invoke'));
+        $this->assertInstanceof('DI\Test\MadeByDelegate', $injector->make('DI\Test\MadeByDelegate'));
     }
 
     public function testUnknownDelegationFunction()
     {
         $injector = new Injector;
         try {
-            $injector->delegate('Auryn\Test\DelegatableInterface', 'FunctionWhichDoesNotExist');
+            $injector->delegate('DI\Test\DelegatableInterface', 'FunctionWhichDoesNotExist');
             $this->fail("Delegation was supposed to fail.");
-        } catch (\Auryn\InjectorException $ie) {
+        } catch (\DI\InjectorException $ie) {
             $this->assertStringContainsString(
                 'FunctionWhichDoesNotExist',
                 $ie->getMessage()
             );
-            $this->assertEquals(\Auryn\Injector::E_DELEGATE_ARGUMENT, $ie->getCode());
+            $this->assertEquals(\DI\Injector::E_DELEGATE_ARGUMENT, $ie->getCode());
         }
     }
 
@@ -432,9 +432,9 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector;
         try {
-            $injector->delegate('Auryn\Test\DelegatableInterface', array('stdClass', 'methodWhichDoesNotExist'));
+            $injector->delegate('DI\Test\DelegatableInterface', array('stdClass', 'methodWhichDoesNotExist'));
             $this->fail("Delegation was supposed to fail.");
-        } catch (\Auryn\InjectorException $ie) {
+        } catch (\DI\InjectorException $ie) {
             $this->assertStringContainsString(
                 'stdClass',
                 $ie->getMessage()
@@ -443,7 +443,7 @@ class InjectorTest extends BaseTest
                 'methodWhichDoesNotExist',
                 $ie->getMessage()
             );
-            $this->assertEquals(\Auryn\Injector::E_DELEGATE_ARGUMENT, $ie->getCode());
+            $this->assertEquals(\DI\Injector::E_DELEGATE_ARGUMENT, $ie->getCode());
         }
     }
 
@@ -462,7 +462,7 @@ class InjectorTest extends BaseTest
 
         // 0 -------------------------------------------------------------------------------------->
 
-        $toInvoke = array('Auryn\Test\ExecuteClassNoDeps', 'execute');
+        $toInvoke = array('DI\Test\ExecuteClassNoDeps', 'execute');
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
@@ -476,7 +476,7 @@ class InjectorTest extends BaseTest
 
         // 2 -------------------------------------------------------------------------------------->
 
-        $toInvoke = array('Auryn\Test\ExecuteClassDeps', 'execute');
+        $toInvoke = array('DI\Test\ExecuteClassDeps', 'execute');
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
@@ -490,14 +490,14 @@ class InjectorTest extends BaseTest
 
         // 4 -------------------------------------------------------------------------------------->
 
-        $toInvoke = array('Auryn\Test\ExecuteClassDepsWithMethodDeps', 'execute');
+        $toInvoke = array('DI\Test\ExecuteClassDepsWithMethodDeps', 'execute');
         $args = array(':arg' => 9382);
         $expectedResult = 9382;
         $return[] = array($toInvoke, $args, $expectedResult);
 
         // 5 -------------------------------------------------------------------------------------->
 
-        $toInvoke = array('Auryn\Test\ExecuteClassStaticMethod', 'execute');
+        $toInvoke = array('DI\Test\ExecuteClassStaticMethod', 'execute');
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
@@ -511,21 +511,21 @@ class InjectorTest extends BaseTest
 
         // 7 -------------------------------------------------------------------------------------->
 
-        $toInvoke = 'Auryn\Test\ExecuteClassStaticMethod::execute';
+        $toInvoke = 'DI\Test\ExecuteClassStaticMethod::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
         // 8 -------------------------------------------------------------------------------------->
 
-        $toInvoke = array('Auryn\Test\ExecuteClassRelativeStaticMethod', 'parent::execute');
+        $toInvoke = array('DI\Test\ExecuteClassRelativeStaticMethod', 'parent::execute');
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
         // 9 -------------------------------------------------------------------------------------->
 
-        $toInvoke = 'Auryn\Test\testExecuteFunction';
+        $toInvoke = 'DI\Test\testExecuteFunction';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
@@ -546,42 +546,42 @@ class InjectorTest extends BaseTest
 
         // 12 ------------------------------------------------------------------------------------->
 
-        $toInvoke = 'Auryn\Test\ExecuteClassInvokable';
+        $toInvoke = 'DI\Test\ExecuteClassInvokable';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
         // 13 ------------------------------------------------------------------------------------->
 
-        $toInvoke = 'Auryn\Test\ExecuteClassNoDeps::execute';
+        $toInvoke = 'DI\Test\ExecuteClassNoDeps::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
         // 14 ------------------------------------------------------------------------------------->
 
-        $toInvoke = 'Auryn\Test\ExecuteClassDeps::execute';
+        $toInvoke = 'DI\Test\ExecuteClassDeps::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
         // 15 ------------------------------------------------------------------------------------->
 
-        $toInvoke = 'Auryn\Test\ExecuteClassStaticMethod::execute';
+        $toInvoke = 'DI\Test\ExecuteClassStaticMethod::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
         // 16 ------------------------------------------------------------------------------------->
 
-        $toInvoke = 'Auryn\Test\ExecuteClassRelativeStaticMethod::parent::execute';
+        $toInvoke = 'DI\Test\ExecuteClassRelativeStaticMethod::parent::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
         // 17 ------------------------------------------------------------------------------------->
 
-        $toInvoke = 'Auryn\Test\testExecuteFunctionWithArg';
+        $toInvoke = 'DI\Test\testExecuteFunctionWithArg';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
@@ -599,7 +599,7 @@ class InjectorTest extends BaseTest
         if (PHP_VERSION_ID > 50400) {
             // 19 ------------------------------------------------------------------------------------->
 
-            $object = new \Auryn\Test\ReturnsCallable('new value');
+            $object = new \DI\Test\ReturnsCallable('new value');
             $args = array();
             $toInvoke = $object->getCallable();
             $expectedResult = 'new value';
@@ -612,63 +612,63 @@ class InjectorTest extends BaseTest
 
     public function testStaticStringInvokableWithArgument()
     {
-        $injector = new \Auryn\Injector;
-        $invokable = $injector->buildExecutable('Auryn\Test\ClassWithStaticMethodThatTakesArg::doSomething');
+        $injector = new \DI\Injector;
+        $invokable = $injector->buildExecutable('DI\Test\ClassWithStaticMethodThatTakesArg::doSomething');
         $this->assertEquals(42, $invokable(41));
     }
 
     public function testInterfaceFactoryDelegation()
     {
         $injector = new Injector;
-        $injector->delegate('Auryn\Test\DelegatableInterface', 'Auryn\Test\ImplementsInterfaceFactory');
-        $requiresDelegatedInterface = $injector->make('Auryn\Test\RequiresDelegatedInterface');
+        $injector->delegate('DI\Test\DelegatableInterface', 'DI\Test\ImplementsInterfaceFactory');
+        $requiresDelegatedInterface = $injector->make('DI\Test\RequiresDelegatedInterface');
         $requiresDelegatedInterface->foo();
     }
 
     public function testMissingAlias()
     {
         $reportedClassname = 'TestMissingDependency';
-        $classname = 'Auryn\Test\TypoInType';
+        $classname = 'DI\Test\TypoInType';
         if (PHP_VERSION_ID >= 80000) {
             $classname = "\"" . $classname . "\"";
             $reportedClassname = 'TypoInType';
         }
 
-        $this->expectException(\Auryn\InjectorException::class);
+        $this->expectException(\DI\InjectorException::class);
         $this->expectExceptionMessage(
-            "Could not make Auryn\\Test\\$reportedClassname: Class $classname does not exist"
+            "Could not make DI\\Test\\$reportedClassname: Class $classname does not exist"
         );
 
         $injector = new Injector;
-        $testClass = $injector->make('Auryn\Test\TestMissingDependency');
+        $testClass = $injector->make('DI\Test\TestMissingDependency');
     }
 
     public function testAliasingConcreteClasses()
     {
         $injector = new Injector;
-        $injector->alias('Auryn\Test\ConcreteClass1', 'Auryn\Test\ConcreteClass2');
-        $obj = $injector->make('Auryn\Test\ConcreteClass1');
-        $this->assertInstanceOf('Auryn\Test\ConcreteClass2', $obj);
+        $injector->alias('DI\Test\ConcreteClass1', 'DI\Test\ConcreteClass2');
+        $obj = $injector->make('DI\Test\ConcreteClass1');
+        $this->assertInstanceOf('DI\Test\ConcreteClass2', $obj);
     }
 
     public function testSharedByAliasedInterfaceName()
     {
         $injector = new Injector;
-        $injector->alias('Auryn\Test\SharedAliasedInterface', 'Auryn\Test\SharedClass');
-        $injector->share('Auryn\Test\SharedAliasedInterface');
-        $class = $injector->make('Auryn\Test\SharedAliasedInterface');
-        $class2 = $injector->make('Auryn\Test\SharedAliasedInterface');
+        $injector->alias('DI\Test\SharedAliasedInterface', 'DI\Test\SharedClass');
+        $injector->share('DI\Test\SharedAliasedInterface');
+        $class = $injector->make('DI\Test\SharedAliasedInterface');
+        $class2 = $injector->make('DI\Test\SharedAliasedInterface');
         $this->assertSame($class, $class2);
     }
 
     public function testNotSharedByAliasedInterfaceName()
     {
         $injector = new Injector;
-        $injector->alias('Auryn\Test\SharedAliasedInterface', 'Auryn\Test\SharedClass');
-        $injector->alias('Auryn\Test\SharedAliasedInterface', 'Auryn\Test\NotSharedClass');
-        $injector->share('Auryn\Test\SharedClass');
-        $class = $injector->make('Auryn\Test\SharedAliasedInterface');
-        $class2 = $injector->make('Auryn\Test\SharedAliasedInterface');
+        $injector->alias('DI\Test\SharedAliasedInterface', 'DI\Test\SharedClass');
+        $injector->alias('DI\Test\SharedAliasedInterface', 'DI\Test\NotSharedClass');
+        $injector->share('DI\Test\SharedClass');
+        $class = $injector->make('DI\Test\SharedAliasedInterface');
+        $class2 = $injector->make('DI\Test\SharedAliasedInterface');
 
         $this->assertNotSame($class, $class2);
     }
@@ -676,30 +676,30 @@ class InjectorTest extends BaseTest
     public function testSharedByAliasedInterfaceNameReversedOrder()
     {
         $injector = new Injector;
-        $injector->share('Auryn\Test\SharedAliasedInterface');
-        $injector->alias('Auryn\Test\SharedAliasedInterface', 'Auryn\Test\SharedClass');
-        $class = $injector->make('Auryn\Test\SharedAliasedInterface');
-        $class2 = $injector->make('Auryn\Test\SharedAliasedInterface');
+        $injector->share('DI\Test\SharedAliasedInterface');
+        $injector->alias('DI\Test\SharedAliasedInterface', 'DI\Test\SharedClass');
+        $class = $injector->make('DI\Test\SharedAliasedInterface');
+        $class2 = $injector->make('DI\Test\SharedAliasedInterface');
         $this->assertSame($class, $class2);
     }
 
     public function testSharedByAliasedInterfaceNameWithParameter()
     {
         $injector = new Injector;
-        $injector->alias('Auryn\Test\SharedAliasedInterface', 'Auryn\Test\SharedClass');
-        $injector->share('Auryn\Test\SharedAliasedInterface');
-        $sharedClass = $injector->make('Auryn\Test\SharedAliasedInterface');
-        $childClass = $injector->make('Auryn\Test\ClassWithAliasAsParameter');
+        $injector->alias('DI\Test\SharedAliasedInterface', 'DI\Test\SharedClass');
+        $injector->share('DI\Test\SharedAliasedInterface');
+        $sharedClass = $injector->make('DI\Test\SharedAliasedInterface');
+        $childClass = $injector->make('DI\Test\ClassWithAliasAsParameter');
         $this->assertSame($sharedClass, $childClass->sharedClass);
     }
 
     public function testSharedByAliasedInstance()
     {
         $injector = new Injector;
-        $injector->alias('Auryn\Test\SharedAliasedInterface', 'Auryn\Test\SharedClass');
-        $sharedClass = $injector->make('Auryn\Test\SharedAliasedInterface');
+        $injector->alias('DI\Test\SharedAliasedInterface', 'DI\Test\SharedClass');
+        $sharedClass = $injector->make('DI\Test\SharedAliasedInterface');
         $injector->share($sharedClass);
-        $childClass = $injector->make('Auryn\Test\ClassWithAliasAsParameter');
+        $childClass = $injector->make('DI\Test\ClassWithAliasAsParameter');
         $this->assertSame($sharedClass, $childClass->sharedClass);
     }
 
@@ -720,7 +720,7 @@ class InjectorTest extends BaseTest
         $inner = TestDependencyWithProtectedConstructor::create();
         $injector->share($inner);
 
-        $outer = $injector->make('Auryn\Test\TestNeedsDepWithProtCons');
+        $outer = $injector->make('DI\Test\TestNeedsDepWithProtCons');
 
         $this->assertSame($inner, $outer->dep);
     }
@@ -728,32 +728,32 @@ class InjectorTest extends BaseTest
     public function testDependencyWhereShared()
     {
         $injector = new Injector;
-        $injector->share('Auryn\Test\ClassInnerB');
-        $innerDep = $injector->make('Auryn\Test\ClassInnerB');
-        $inner = $injector->make('Auryn\Test\ClassInnerA');
+        $injector->share('DI\Test\ClassInnerB');
+        $innerDep = $injector->make('DI\Test\ClassInnerB');
+        $inner = $injector->make('DI\Test\ClassInnerA');
         $this->assertSame($innerDep, $inner->dep);
-        $outer = $injector->make('Auryn\Test\ClassOuter');
+        $outer = $injector->make('DI\Test\ClassOuter');
         $this->assertSame($innerDep, $outer->dep->dep);
     }
 
     public function testBugWithReflectionPoolIncorrectlyReturningBadInfo()
     {
         $injector = new Injector;
-        $obj = $injector->make('Auryn\Test\ClassOuter');
-        $this->assertInstanceOf('Auryn\Test\ClassOuter', $obj);
-        $this->assertInstanceOf('Auryn\Test\ClassInnerA', $obj->dep);
-        $this->assertInstanceOf('Auryn\Test\ClassInnerB', $obj->dep->dep);
+        $obj = $injector->make('DI\Test\ClassOuter');
+        $this->assertInstanceOf('DI\Test\ClassOuter', $obj);
+        $this->assertInstanceOf('DI\Test\ClassInnerA', $obj->dep);
+        $this->assertInstanceOf('DI\Test\ClassInnerB', $obj->dep->dep);
     }
 
     public function provideCyclicDependencies()
     {
         return array(
-            'Auryn\Test\RecursiveClassA' => array('Auryn\Test\RecursiveClassA'),
-            'Auryn\Test\RecursiveClassB' => array('Auryn\Test\RecursiveClassB'),
-            'Auryn\Test\RecursiveClassC' => array('Auryn\Test\RecursiveClassC'),
-            'Auryn\Test\RecursiveClass1' => array('Auryn\Test\RecursiveClass1'),
-            'Auryn\Test\RecursiveClass2' => array('Auryn\Test\RecursiveClass2'),
-            'Auryn\Test\DependsOnCyclic' => array('Auryn\Test\DependsOnCyclic'),
+            'DI\Test\RecursiveClassA' => array('DI\Test\RecursiveClassA'),
+            'DI\Test\RecursiveClassB' => array('DI\Test\RecursiveClassB'),
+            'DI\Test\RecursiveClassC' => array('DI\Test\RecursiveClassC'),
+            'DI\Test\RecursiveClass1' => array('DI\Test\RecursiveClass1'),
+            'DI\Test\RecursiveClass2' => array('DI\Test\RecursiveClass2'),
+            'DI\Test\DependsOnCyclic' => array('DI\Test\DependsOnCyclic'),
         );
     }
 
@@ -762,8 +762,8 @@ class InjectorTest extends BaseTest
      */
     public function testCyclicDependencies($class)
     {
-        $this->expectException(\Auryn\InjectionException::class);
-        $this->expectExceptionCode(\Auryn\Injector::E_CYCLIC_DEPENDENCY);
+        $this->expectException(\DI\InjectionException::class);
+        $this->expectExceptionCode(\DI\Injector::E_CYCLIC_DEPENDENCY);
 
         $injector = new Injector;
         $injector->make($class);
@@ -772,8 +772,8 @@ class InjectorTest extends BaseTest
     public function testNonConcreteDependencyWithDefault()
     {
         $injector = new Injector;
-        $class = $injector->make('Auryn\Test\NonConcreteDependencyWithDefaultValue');
-        $this->assertInstanceOf('Auryn\Test\NonConcreteDependencyWithDefaultValue', $class);
+        $class = $injector->make('DI\Test\NonConcreteDependencyWithDefaultValue');
+        $this->assertInstanceOf('DI\Test\NonConcreteDependencyWithDefaultValue', $class);
         $this->assertNull($class->interface);
     }
 
@@ -781,34 +781,34 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector;
         $injector->alias(
-            'Auryn\Test\DelegatableInterface',
-            'Auryn\Test\ImplementsInterface'
+            'DI\Test\DelegatableInterface',
+            'DI\Test\ImplementsInterface'
         );
-        $class = $injector->make('Auryn\Test\NonConcreteDependencyWithDefaultValue');
-        $this->assertInstanceOf('Auryn\Test\NonConcreteDependencyWithDefaultValue', $class);
-        $this->assertInstanceOf('Auryn\Test\ImplementsInterface', $class->interface);
+        $class = $injector->make('DI\Test\NonConcreteDependencyWithDefaultValue');
+        $this->assertInstanceOf('DI\Test\NonConcreteDependencyWithDefaultValue', $class);
+        $this->assertInstanceOf('DI\Test\ImplementsInterface', $class->interface);
     }
 
     public function testNonConcreteDependencyWithDefaultValueThroughDelegation()
     {
         $injector = new Injector;
-        $injector->delegate('Auryn\Test\DelegatableInterface', 'Auryn\Test\ImplementsInterfaceFactory');
-        $class = $injector->make('Auryn\Test\NonConcreteDependencyWithDefaultValue');
-        $this->assertInstanceOf('Auryn\Test\NonConcreteDependencyWithDefaultValue', $class);
-        $this->assertInstanceOf('Auryn\Test\ImplementsInterface', $class->interface);
+        $injector->delegate('DI\Test\DelegatableInterface', 'DI\Test\ImplementsInterfaceFactory');
+        $class = $injector->make('DI\Test\NonConcreteDependencyWithDefaultValue');
+        $this->assertInstanceOf('DI\Test\NonConcreteDependencyWithDefaultValue', $class);
+        $this->assertInstanceOf('DI\Test\ImplementsInterface', $class->interface);
     }
 
     public function testDependencyWithDefaultValueThroughShare()
     {
         $injector = new Injector;
         //Instance is not shared, null default is used for dependency
-        $instance = $injector->make('Auryn\Test\ConcreteDependencyWithDefaultValue');
+        $instance = $injector->make('DI\Test\ConcreteDependencyWithDefaultValue');
         $this->assertNull($instance->dependency);
 
         //Instance is explicitly shared, $instance is used for dependency
         $instance = new \StdClass();
         $injector->share($instance);
-        $instance = $injector->make('Auryn\Test\ConcreteDependencyWithDefaultValue');
+        $instance = $injector->make('DI\Test\ConcreteDependencyWithDefaultValue');
         $this->assertInstanceOf('StdClass', $instance->dependency);
     }
 
@@ -816,11 +816,11 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector();
         $testClass = new \StdClass();
-        $injector->alias('StdClass', 'Auryn\Test\SomeOtherClass');
+        $injector->alias('StdClass', 'DI\Test\SomeOtherClass');
 
-        $this->expectException(\Auryn\ConfigException::class);
-        $this->expectExceptionMessage('Cannot share class stdclass because it is currently aliased to Auryn\Test\SomeOtherClass');
-        $this->expectExceptionCode(\Auryn\Injector::E_ALIASED_CANNOT_SHARE);
+        $this->expectException(\DI\ConfigException::class);
+        $this->expectExceptionMessage('Cannot share class stdclass because it is currently aliased to DI\Test\SomeOtherClass');
+        $this->expectExceptionCode(\DI\Injector::E_ALIASED_CANNOT_SHARE);
 
         $injector->share($testClass);
     }
@@ -829,31 +829,31 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector();
         $testClass = new DepImplementation();
-        $injector->alias('Auryn\Test\DepInterface', 'Auryn\Test\DepImplementation');
+        $injector->alias('DI\Test\DepInterface', 'DI\Test\DepImplementation');
         $injector->share($testClass);
-        $obj = $injector->make('Auryn\Test\DepInterface');
-        $this->assertInstanceOf('Auryn\Test\DepImplementation', $obj);
+        $obj = $injector->make('DI\Test\DepInterface');
+        $this->assertInstanceOf('DI\Test\DepImplementation', $obj);
     }
 
     public function testAliasAfterShareByStringAllowed()
     {
         $injector = new Injector();
-        $injector->share('Auryn\Test\DepInterface');
-        $injector->alias('Auryn\Test\DepInterface', 'Auryn\Test\DepImplementation');
-        $obj = $injector->make('Auryn\Test\DepInterface');
-        $obj2 = $injector->make('Auryn\Test\DepInterface');
-        $this->assertInstanceOf('Auryn\Test\DepImplementation', $obj);
+        $injector->share('DI\Test\DepInterface');
+        $injector->alias('DI\Test\DepInterface', 'DI\Test\DepImplementation');
+        $obj = $injector->make('DI\Test\DepInterface');
+        $obj2 = $injector->make('DI\Test\DepInterface');
+        $this->assertInstanceOf('DI\Test\DepImplementation', $obj);
         $this->assertEquals($obj, $obj2);
     }
 
     public function testAliasAfterShareBySharingAliasAllowed()
     {
         $injector = new Injector();
-        $injector->share('Auryn\Test\DepImplementation');
-        $injector->alias('Auryn\Test\DepInterface', 'Auryn\Test\DepImplementation');
-        $obj = $injector->make('Auryn\Test\DepInterface');
-        $obj2 = $injector->make('Auryn\Test\DepInterface');
-        $this->assertInstanceOf('Auryn\Test\DepImplementation', $obj);
+        $injector->share('DI\Test\DepImplementation');
+        $injector->alias('DI\Test\DepInterface', 'DI\Test\DepImplementation');
+        $obj = $injector->make('DI\Test\DepInterface');
+        $obj2 = $injector->make('DI\Test\DepInterface');
+        $this->assertInstanceOf('DI\Test\DepImplementation', $obj);
         $this->assertEquals($obj, $obj2);
     }
 
@@ -863,38 +863,38 @@ class InjectorTest extends BaseTest
         $testClass = new \StdClass();
         $injector->share($testClass);
 
-        $this->expectException(\Auryn\ConfigException::class);
-        $this->expectExceptionMessage('Cannot alias class stdclass to Auryn\Test\SomeOtherClass because it is currently shared');
-        $this->expectExceptionCode(\Auryn\Injector::E_SHARED_CANNOT_ALIAS);
-        $injector->alias('StdClass', 'Auryn\Test\SomeOtherClass');
+        $this->expectException(\DI\ConfigException::class);
+        $this->expectExceptionMessage('Cannot alias class stdclass to DI\Test\SomeOtherClass because it is currently shared');
+        $this->expectExceptionCode(\DI\Injector::E_SHARED_CANNOT_ALIAS);
+        $injector->alias('StdClass', 'DI\Test\SomeOtherClass');
     }
 
     public function testAppropriateExceptionThrownOnNonPublicConstructor()
     {
-        $this->expectException(\Auryn\InjectionException::class);
-        $this->expectExceptionMessage('Cannot instantiate protected/private constructor in class Auryn\Test\HasNonPublicConstructor');
-        $this->expectExceptionCode(\Auryn\Injector::E_NON_PUBLIC_CONSTRUCTOR);
+        $this->expectException(\DI\InjectionException::class);
+        $this->expectExceptionMessage('Cannot instantiate protected/private constructor in class DI\Test\HasNonPublicConstructor');
+        $this->expectExceptionCode(\DI\Injector::E_NON_PUBLIC_CONSTRUCTOR);
 
         $injector = new Injector();
-        $injector->make('Auryn\Test\HasNonPublicConstructor');
+        $injector->make('DI\Test\HasNonPublicConstructor');
     }
 
     public function testAppropriateExceptionThrownOnNonPublicConstructorWithArgs()
     {
-        $this->expectException(\Auryn\InjectionException::class);
-        $this->expectExceptionMessage('Cannot instantiate protected/private constructor in class Auryn\Test\HasNonPublicConstructorWithArgs');
-        $this->expectExceptionCode(\Auryn\Injector::E_NON_PUBLIC_CONSTRUCTOR);
+        $this->expectException(\DI\InjectionException::class);
+        $this->expectExceptionMessage('Cannot instantiate protected/private constructor in class DI\Test\HasNonPublicConstructorWithArgs');
+        $this->expectExceptionCode(\DI\Injector::E_NON_PUBLIC_CONSTRUCTOR);
 
         $injector = new Injector();
-        $injector->make('Auryn\Test\HasNonPublicConstructorWithArgs');
+        $injector->make('DI\Test\HasNonPublicConstructorWithArgs');
     }
 
     public function testMakeExecutableFailsOnNonExistentFunction()
     {
         $injector = new Injector();
-        $this->expectException(\Auryn\InjectionException::class);
+        $this->expectException(\DI\InjectionException::class);
         $this->expectExceptionMessage('nonExistentFunction');
-        $this->expectExceptionCode(\Auryn\Injector::E_INVOKABLE);
+        $this->expectExceptionCode(\DI\Injector::E_INVOKABLE);
 
 
         $injector->buildExecutable('nonExistentFunction');
@@ -904,27 +904,27 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector();
         $object = new \StdClass();
-        $this->expectException(\Auryn\InjectionException::class);
+        $this->expectException(\DI\InjectionException::class);
         $this->expectExceptionMessage("[object(stdClass), 'nonExistentMethod']");
-        $this->expectExceptionCode(\Auryn\Injector::E_INVOKABLE);
+        $this->expectExceptionCode(\DI\Injector::E_INVOKABLE);
         $injector->buildExecutable(array($object, 'nonExistentMethod'));
     }
 
     public function testMakeExecutableFailsOnNonExistentStaticMethod()
     {
         $injector = new Injector();
-        $this->expectException(\Auryn\InjectionException::class);
+        $this->expectException(\DI\InjectionException::class);
         $this->expectExceptionMessage("StdClass::nonExistentMethod");
-        $this->expectExceptionCode(\Auryn\Injector::E_INVOKABLE);
+        $this->expectExceptionCode(\DI\Injector::E_INVOKABLE);
 
         $injector->buildExecutable(array('StdClass', 'nonExistentMethod'));
     }
 
     public function testMakeExecutableFailsOnClassWithoutInvoke()
     {
-        $this->expectException(\Auryn\InjectionException::class);
+        $this->expectException(\DI\InjectionException::class);
         $this->expectExceptionMessage('Invalid invokable: callable or provisional string required');
-        $this->expectExceptionCode(\Auryn\Injector::E_INVOKABLE);
+        $this->expectExceptionCode(\DI\Injector::E_INVOKABLE);
 
         $injector = new Injector();
         $object = new \StdClass();
@@ -935,38 +935,38 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector;
 
-        $this->expectException(\Auryn\ConfigException::class);
+        $this->expectException(\DI\ConfigException::class);
         $this->expectExceptionMessage(Injector::M_NON_EMPTY_STRING_ALIAS);
-        $this->expectExceptionCode(\Auryn\Injector::E_NON_EMPTY_STRING_ALIAS);
+        $this->expectExceptionCode(\DI\Injector::E_NON_EMPTY_STRING_ALIAS);
 
-        $injector->alias('', 'Auryn\Test\DepImplementation');
+        $injector->alias('', 'DI\Test\DepImplementation');
     }
 
     public function testBadAliasSecondArg()
     {
         $injector = new Injector();
-        $injector->share('Auryn\Test\DepInterface');
+        $injector->share('DI\Test\DepInterface');
 
 
-        $this->expectException(\Auryn\ConfigException::class);
+        $this->expectException(\DI\ConfigException::class);
         $this->expectExceptionMessage('Invalid alias: non-empty string required at arguments 1 and 2');
-        $this->expectExceptionCode(\Auryn\Injector::E_NON_EMPTY_STRING_ALIAS);
+        $this->expectExceptionCode(\DI\Injector::E_NON_EMPTY_STRING_ALIAS);
 
-        $injector->alias('Auryn\Test\DepInterface', '');
+        $injector->alias('DI\Test\DepInterface', '');
     }
 
     public function testShareNewAlias()
     {
         $injector = new Injector();
-        $injector->share('Auryn\Test\DepImplementation');
-        $injector->alias('Auryn\Test\DepInterface', 'Auryn\Test\DepImplementation');
+        $injector->share('DI\Test\DepImplementation');
+        $injector->alias('DI\Test\DepInterface', 'DI\Test\DepImplementation');
     }
 
     public function testDefineWithBackslashAndMakeWithoutBackslash()
     {
         $injector = new Injector();
-        $injector->define('Auryn\Test\SimpleNoTypeClass', array(':arg' => 'tested'));
-        $testClass = $injector->make('Auryn\Test\SimpleNoTypeClass');
+        $injector->define('DI\Test\SimpleNoTypeClass', array(':arg' => 'tested'));
+        $testClass = $injector->make('DI\Test\SimpleNoTypeClass');
         $this->assertEquals('tested', $testClass->testParam);
     }
 
@@ -996,10 +996,10 @@ class InjectorTest extends BaseTest
     public function testInterfaceMutate()
     {
         $injector = new Injector();
-        $injector->prepare('Auryn\Test\SomeInterface', function ($obj, $injector) {
+        $injector->prepare('DI\Test\SomeInterface', function ($obj, $injector) {
             $obj->testProp = 42;
         });
-        $obj = $injector->make('Auryn\Test\PreparesImplementationTest');
+        $obj = $injector->make('DI\Test\PreparesImplementationTest');
 
         $this->assertSame(42, $obj->testProp);
     }
@@ -1013,22 +1013,22 @@ class InjectorTest extends BaseTest
     public function testCustomDefinitionNotPassedThrough()
     {
         $injector = new Injector();
-        $injector->share('Auryn\Test\DependencyWithDefinedParam');
+        $injector->share('DI\Test\DependencyWithDefinedParam');
 
-        $this->expectException(\Auryn\InjectionException::class);
+        $this->expectException(\DI\InjectionException::class);
         // TODO - why does this message end with double-colon?
-        $this->expectExceptionMessage('No definition available to provision typeless parameter $foo at position 0 in Auryn\Test\DependencyWithDefinedParam::__construct() declared in Auryn\Test\DependencyWithDefinedParam::');
-        $this->expectExceptionCode(\Auryn\Injector::E_UNDEFINED_PARAM);
+        $this->expectExceptionMessage('No definition available to provision typeless parameter $foo at position 0 in DI\Test\DependencyWithDefinedParam::__construct() declared in DI\Test\DependencyWithDefinedParam::');
+        $this->expectExceptionCode(\DI\Injector::E_UNDEFINED_PARAM);
 
-        $injector->make('Auryn\Test\RequiresDependencyWithDefinedParam', array(':foo' => 5));
+        $injector->make('DI\Test\RequiresDependencyWithDefinedParam', array(':foo' => 5));
     }
 
     public function testDelegationFunction()
     {
         $injector = new Injector();
-        $injector->delegate('Auryn\Test\TestDelegationSimple', 'Auryn\Test\createTestDelegationSimple');
-        $obj = $injector->make('Auryn\Test\TestDelegationSimple');
-        $this->assertInstanceOf('Auryn\Test\TestDelegationSimple', $obj);
+        $injector->delegate('DI\Test\TestDelegationSimple', 'DI\Test\createTestDelegationSimple');
+        $obj = $injector->make('DI\Test\TestDelegationSimple');
+        $this->assertInstanceOf('DI\Test\TestDelegationSimple', $obj);
         $this->assertTrue($obj->delegateCalled);
     }
 
@@ -1036,50 +1036,50 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector();
         $injector->delegate(
-            'Auryn\Test\TestDelegationDependency',
-            'Auryn\Test\createTestDelegationDependency'
+            'DI\Test\TestDelegationDependency',
+            'DI\Test\createTestDelegationDependency'
         );
-        $obj = $injector->make('Auryn\Test\TestDelegationDependency');
-        $this->assertInstanceOf('Auryn\Test\TestDelegationDependency', $obj);
+        $obj = $injector->make('DI\Test\TestDelegationDependency');
+        $this->assertInstanceOf('DI\Test\TestDelegationDependency', $obj);
         $this->assertTrue($obj->delegateCalled);
     }
 
     public function testExecutableAliasing()
     {
         $injector = new Injector();
-        $injector->alias('Auryn\Test\BaseExecutableClass', 'Auryn\Test\ExtendsExecutableClass');
-        $result = $injector->execute(array('Auryn\Test\BaseExecutableClass', 'foo'));
+        $injector->alias('DI\Test\BaseExecutableClass', 'DI\Test\ExtendsExecutableClass');
+        $result = $injector->execute(array('DI\Test\BaseExecutableClass', 'foo'));
         $this->assertEquals('This is the ExtendsExecutableClass', $result);
     }
 
     public function testExecutableAliasingStatic()
     {
         $injector = new Injector();
-        $injector->alias('Auryn\Test\BaseExecutableClass', 'Auryn\Test\ExtendsExecutableClass');
-        $result = $injector->execute(array('Auryn\Test\BaseExecutableClass', 'bar'));
+        $injector->alias('DI\Test\BaseExecutableClass', 'DI\Test\ExtendsExecutableClass');
+        $result = $injector->execute(array('DI\Test\BaseExecutableClass', 'bar'));
         $this->assertEquals('This is the ExtendsExecutableClass', $result);
     }
 
     /**
      * Test coverage for delegate closures that are defined outside
      * of a class.ph
-     * @throws \Auryn\ConfigException
+     * @throws \DI\ConfigException
      */
     public function testDelegateClosure()
     {
-        $delegateClosure = \Auryn\Test\getDelegateClosureInGlobalScope();
+        $delegateClosure = \DI\Test\getDelegateClosureInGlobalScope();
         $injector = new Injector();
-        $injector->delegate('Auryn\Test\DelegateClosureInGlobalScope', $delegateClosure);
-        $injector->make('Auryn\Test\DelegateClosureInGlobalScope');
+        $injector->delegate('DI\Test\DelegateClosureInGlobalScope', $delegateClosure);
+        $injector->make('DI\Test\DelegateClosureInGlobalScope');
     }
 
     public function testCloningWithServiceLocator()
     {
         $injector = new Injector();
         $injector->share($injector);
-        $instance = $injector->make('Auryn\Test\CloneTest');
+        $instance = $injector->make('DI\Test\CloneTest');
         $newInjector = $instance->injector;
-        $newInstance = $newInjector->make('Auryn\Test\CloneTest');
+        $newInstance = $newInjector->make('DI\Test\CloneTest');
     }
 
     public function testAbstractExecute()
@@ -1087,11 +1087,11 @@ class InjectorTest extends BaseTest
         $injector = new Injector();
 
         $fn = function () {
-            return new \Auryn\Test\ConcreteExexcuteTest();
+            return new \DI\Test\ConcreteExexcuteTest();
         };
 
-        $injector->delegate('Auryn\Test\AbstractExecuteTest', $fn);
-        $result = $injector->execute(array('Auryn\Test\AbstractExecuteTest', 'process'));
+        $injector->delegate('DI\Test\AbstractExecuteTest', $fn);
+        $result = $injector->execute(array('DI\Test\AbstractExecuteTest', 'process'));
 
         $this->assertEquals('Concrete', $result);
     }
@@ -1100,23 +1100,23 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector();
         try {
-            $injector->make('Auryn\Test\DependencyChainTest');
-        } catch (\Auryn\InjectionException $ie) {
+            $injector->make('DI\Test\DependencyChainTest');
+        } catch (\DI\InjectionException $ie) {
             $chain = $ie->getDependencyChain();
             $this->assertCount(2, $chain);
 
-            $this->assertEquals('auryn\test\dependencychaintest', $chain[0]);
-            $this->assertEquals('auryn\test\depinterface', $chain[1]);
+            $this->assertEquals('di\test\dependencychaintest', $chain[0]);
+            $this->assertEquals('di\test\depinterface', $chain[1]);
         }
     }
 
     public function testInspectShares()
     {
         $injector = new Injector();
-        $injector->share('Auryn\Test\SomeClassName');
+        $injector->share('DI\Test\SomeClassName');
 
-        $inspection = $injector->inspect('Auryn\Test\SomeClassName', Injector::I_SHARES);
-        $this->assertArrayHasKey('auryn\test\someclassname', $inspection[Injector::I_SHARES]);
+        $inspection = $injector->inspect('DI\Test\SomeClassName', Injector::I_SHARES);
+        $this->assertArrayHasKey('di\test\someclassname', $inspection[Injector::I_SHARES]);
     }
 
     public function testInspectAll()
@@ -1124,22 +1124,22 @@ class InjectorTest extends BaseTest
         $injector = new Injector();
 
         // Injector::I_BINDINGS
-        $injector->define('Auryn\Test\DependencyWithDefinedParam', array(':arg' => 42));
+        $injector->define('DI\Test\DependencyWithDefinedParam', array(':arg' => 42));
 
         // Injector::I_DELEGATES
-        $injector->delegate('Auryn\Test\MadeByDelegate', 'Auryn\Test\CallableDelegateClassTest');
+        $injector->delegate('DI\Test\MadeByDelegate', 'DI\Test\CallableDelegateClassTest');
 
         // Injector::I_PREPARES
-        $injector->prepare('Auryn\Test\MadeByDelegate', function ($c) {});
+        $injector->prepare('DI\Test\MadeByDelegate', function ($c) {});
 
         // Injector::I_ALIASES
-        $injector->alias('i', 'Auryn\Injector');
+        $injector->alias('i', 'DI\Injector');
 
         // Injector::I_SHARES
-        $injector->share('Auryn\Injector');
+        $injector->share('DI\Injector');
 
         $all = $injector->inspect();
-        $some = $injector->inspect('Auryn\Test\MadeByDelegate');
+        $some = $injector->inspect('DI\Test\MadeByDelegate');
 
         $this->assertCount(5, array_filter($all));
         $this->assertCount(2, array_filter($some));
@@ -1151,13 +1151,13 @@ class InjectorTest extends BaseTest
             return null;
         };
         $injector = new Injector();
-        $injector->delegate('Auryn\Test\SomeClassName', $delegate);
+        $injector->delegate('DI\Test\SomeClassName', $delegate);
 
-        $this->expectException(\Auryn\InjectionException::class);
-        $this->expectExceptionMessage('Making auryn\test\someclassname did not result in an object, instead result is of type \'NULL\'');
-        $this->expectExceptionCode(\Auryn\Injector::E_MAKING_FAILED);
+        $this->expectException(\DI\InjectionException::class);
+        $this->expectExceptionMessage('Making di\test\someclassname did not result in an object, instead result is of type \'NULL\'');
+        $this->expectExceptionCode(\DI\Injector::E_MAKING_FAILED);
 
-        $injector->make('Auryn\Test\SomeClassName');
+        $injector->make('DI\Test\SomeClassName');
     }
 
     public function testDelegationDoesntMakeObjectMakesString()
@@ -1166,20 +1166,20 @@ class InjectorTest extends BaseTest
             return 'ThisIsNotAClass';
         };
         $injector = new Injector();
-        $injector->delegate('Auryn\Test\SomeClassName', $delegate);
+        $injector->delegate('DI\Test\SomeClassName', $delegate);
 
-        $this->expectException(\Auryn\InjectionException::class);
-        $this->expectExceptionMessage('Making auryn\test\someclassname did not result in an object, instead result is of type \'string\'');
-        $this->expectExceptionCode(\Auryn\Injector::E_MAKING_FAILED);
+        $this->expectException(\DI\InjectionException::class);
+        $this->expectExceptionMessage('Making di\test\someclassname did not result in an object, instead result is of type \'string\'');
+        $this->expectExceptionCode(\DI\Injector::E_MAKING_FAILED);
 
-        $injector->make('Auryn\Test\SomeClassName');
+        $injector->make('DI\Test\SomeClassName');
     }
 
     public function testPrepareInvalidCallable()
     {
         $injector = new Injector;
         $invalidCallable = 'This_does_not_exist';
-        $this->expectException(\Auryn\ConfigException::class);
+        $this->expectException(\DI\ConfigException::class);
         $this->expectExceptionMessage($invalidCallable);
 
         $injector->prepare("StdClass", $invalidCallable);
@@ -1189,10 +1189,10 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector;
         $expected = new SomeImplementation; // <-- implements SomeInterface
-        $injector->prepare("Auryn\Test\SomeInterface", function ($impl) use ($expected) {
+        $injector->prepare("DI\Test\SomeInterface", function ($impl) use ($expected) {
             return $expected;
         });
-        $actual = $injector->make("Auryn\Test\SomeImplementation");
+        $actual = $injector->make("DI\Test\SomeImplementation");
         $this->assertSame($expected, $actual);
     }
 
@@ -1200,10 +1200,10 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector;
         $expected = new SomeImplementation; // <-- implements SomeInterface
-        $injector->prepare("Auryn\Test\SomeImplementation", function ($impl) use ($expected) {
+        $injector->prepare("DI\Test\SomeImplementation", function ($impl) use ($expected) {
             return $expected;
         });
-        $actual = $injector->make("Auryn\Test\SomeImplementation");
+        $actual = $injector->make("DI\Test\SomeImplementation");
         $this->assertSame($expected, $actual);
     }
 
@@ -1211,19 +1211,19 @@ class InjectorTest extends BaseTest
 
         $injector = new Injector;
         try {
-            $injector->define('Auryn\Test\ParentWithConstructor', array(':foo' => 'parent'));
-            $injector->define('Auryn\Test\ChildWithoutConstructor', array(':foo' => 'child'));
+            $injector->define('DI\Test\ParentWithConstructor', array(':foo' => 'parent'));
+            $injector->define('DI\Test\ChildWithoutConstructor', array(':foo' => 'child'));
 
-            $injector->share('Auryn\Test\ParentWithConstructor');
-            $injector->share('Auryn\Test\ChildWithoutConstructor');
+            $injector->share('DI\Test\ParentWithConstructor');
+            $injector->share('DI\Test\ChildWithoutConstructor');
 
-            $child = $injector->make('Auryn\Test\ChildWithoutConstructor');
+            $child = $injector->make('DI\Test\ChildWithoutConstructor');
             $this->assertEquals('child', $child->foo);
 
-            $parent = $injector->make('Auryn\Test\ParentWithConstructor');
+            $parent = $injector->make('DI\Test\ParentWithConstructor');
             $this->assertEquals('parent', $parent->foo);
         }
-        catch (\Auryn\InjectionException $ie) {
+        catch (\DI\InjectionException $ie) {
             echo $ie->getMessage();
             $this->fail("Auryn failed to locate the ");
         }
@@ -1232,30 +1232,30 @@ class InjectorTest extends BaseTest
     public function testChildWithoutConstructorMissingParam()
     {
         $injector = new Injector;
-        $injector->define('Auryn\Test\ParentWithConstructor', array(':foo' => 'parent'));
+        $injector->define('DI\Test\ParentWithConstructor', array(':foo' => 'parent'));
 
 
-        $this->expectException(\Auryn\InjectionException::class);
-        $this->expectExceptionMessage('No definition available to provision typeless parameter $foo at position 0 in Auryn\Test\ChildWithoutConstructor::__construct() declared in Auryn\Test\ParentWithConstructor');
+        $this->expectException(\DI\InjectionException::class);
+        $this->expectExceptionMessage('No definition available to provision typeless parameter $foo at position 0 in DI\Test\ChildWithoutConstructor::__construct() declared in DI\Test\ParentWithConstructor');
 
-        $injector->make('Auryn\Test\ChildWithoutConstructor');
+        $injector->make('DI\Test\ChildWithoutConstructor');
     }
 
     public function testInstanceClosureDelegates()
     {
         $injector = new Injector;
-        $injector->delegate('Auryn\Test\DelegatingInstanceA', function (DelegateA $d) {
-            return new \Auryn\Test\DelegatingInstanceA($d);
+        $injector->delegate('DI\Test\DelegatingInstanceA', function (DelegateA $d) {
+            return new \DI\Test\DelegatingInstanceA($d);
         });
-        $injector->delegate('Auryn\Test\DelegatingInstanceB', function (DelegateB $d) {
-            return new \Auryn\Test\DelegatingInstanceB($d);
+        $injector->delegate('DI\Test\DelegatingInstanceB', function (DelegateB $d) {
+            return new \DI\Test\DelegatingInstanceB($d);
         });
 
-        $a = $injector->make('Auryn\Test\DelegatingInstanceA');
-        $b = $injector->make('Auryn\Test\DelegatingInstanceB');
+        $a = $injector->make('DI\Test\DelegatingInstanceA');
+        $b = $injector->make('DI\Test\DelegatingInstanceB');
 
-        $this->assertInstanceOf('Auryn\Test\DelegateA', $a->a);
-        $this->assertInstanceOf('Auryn\Test\DelegateB', $b->b);
+        $this->assertInstanceOf('DI\Test\DelegateA', $a->a);
+        $this->assertInstanceOf('DI\Test\DelegateB', $b->b);
     }
 
 
@@ -1264,20 +1264,20 @@ class InjectorTest extends BaseTest
         $injector = new Injector;
 
         try {
-            $injector->make('Auryn\Test\ThrowsExceptionInConstructor');
+            $injector->make('DI\Test\ThrowsExceptionInConstructor');
         } catch (\Exception $e) {
         }
 
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Exception in constructor');
 
-        $injector->make('Auryn\Test\ThrowsExceptionInConstructor');
+        $injector->make('DI\Test\ThrowsExceptionInConstructor');
     }
 
     public function testProvidesExtensionsOfArrayMap()
     {
         $injector = new Injector;
-        $obj = $injector->make('\Auryn\Test\ExtendedExtendedArrayObject');
+        $obj = $injector->make('\DI\Test\ExtendedExtendedArrayObject');
 
         $this->assertInstanceOf('\ArrayObject', $obj);
     }
@@ -1289,16 +1289,16 @@ class InjectorTest extends BaseTest
         $closure_was_called = false;
         $fn = function () use (&$closure_was_called, $value) {
             $closure_was_called = true;
-            return \Auryn\Test\PrefixDelegateTestDependency::create($value);
+            return \DI\Test\PrefixDelegateTestDependency::create($value);
         };
 
         $injector = new Injector;
         $object = $injector->make(
-            \Auryn\Test\PrefixDelegateTest::class,
+            \DI\Test\PrefixDelegateTest::class,
             [Injector::A_DELEGATE . 'b' => $fn]
         );
         $this->assertInstanceOf(
-            \Auryn\Test\PrefixDelegateTest::class,
+            \DI\Test\PrefixDelegateTest::class,
             $object
         );
         $this->assertTrue($closure_was_called);
@@ -1311,11 +1311,11 @@ class InjectorTest extends BaseTest
         $value = 'testMakeWithParameter_raw';
         $injector = new Injector;
         $object = $injector->make(
-            \Auryn\Test\PrefixDelegateTest::class,
-            [Injector::A_RAW . 'b' => \Auryn\Test\PrefixDelegateTestDependency::create($value)]
+            \DI\Test\PrefixDelegateTest::class,
+            [Injector::A_RAW . 'b' => \DI\Test\PrefixDelegateTestDependency::create($value)]
         );
         $this->assertInstanceOf(
-            \Auryn\Test\PrefixDelegateTest::class,
+            \DI\Test\PrefixDelegateTest::class,
             $object
         );
 
@@ -1327,11 +1327,11 @@ class InjectorTest extends BaseTest
     {
         $injector = new Injector;
         $object = $injector->make(
-            \Auryn\Test\PrefixDelegateTest::class,
-            [Injector::A_DEFINE . 'b' => [\Auryn\Test\PrefixDelegateTestDependencyInstantiable::class, []]]
+            \DI\Test\PrefixDelegateTest::class,
+            [Injector::A_DEFINE . 'b' => [\DI\Test\PrefixDelegateTestDependencyInstantiable::class, []]]
         );
         $this->assertInstanceOf(
-            \Auryn\Test\PrefixDelegateTest::class,
+            \DI\Test\PrefixDelegateTest::class,
             $object
         );
 
@@ -1341,7 +1341,7 @@ class InjectorTest extends BaseTest
     /**
      * interpret the param as a class definition
      * @return void
-     * @throws \Auryn\InjectionException
+     * @throws \DI\InjectionException
      */
     public function testMakeWithParameter_define_uses_info()
     {
@@ -1349,22 +1349,22 @@ class InjectorTest extends BaseTest
         $injector = new Injector;
 
         $params = [
-            \Auryn\Test\PrefixDefineDependency::class,
+            \DI\Test\PrefixDefineDependency::class,
             [Injector::A_RAW . 'message' => $message]
         ];
 
         $object = $injector->make(
-            \Auryn\Test\PrefixDefineTest::class,
+            \DI\Test\PrefixDefineTest::class,
             [Injector::A_DEFINE . 'pdd' => $params]
         );
 
         $this->assertInstanceOf(
-            \Auryn\Test\PrefixDefineTest::class,
+            \DI\Test\PrefixDefineTest::class,
             $object
         );
 
         $dependency = $object->getPdd();
-        $this->assertInstanceOf(\Auryn\Test\PrefixDefineDependency::class, $dependency);
+        $this->assertInstanceOf(\DI\Test\PrefixDefineDependency::class, $dependency);
         $this->assertSame($message, $dependency->message);
     }
 
@@ -1377,12 +1377,12 @@ class InjectorTest extends BaseTest
         ];
         $injector = new Injector;
         $object = $injector->make(
-            \Auryn\Test\PrefixDefineDependency::class,
+            \DI\Test\PrefixDefineDependency::class,
             $params
         );
 
         $this->assertInstanceOf(
-            \Auryn\Test\PrefixDefineDependency::class,
+            \DI\Test\PrefixDefineDependency::class,
             $object
         );
 
@@ -1397,7 +1397,7 @@ class InjectorTest extends BaseTest
             Injector::M_INVALID_DEFINE_ARGUMENT_NOT_ARRAY
         );
         $injector->make(
-            \Auryn\Test\PrefixDelegateTest::class,
+            \DI\Test\PrefixDelegateTest::class,
             [Injector::A_DEFINE . 'b' => 'this is not an array']
         );
     }
@@ -1413,7 +1413,7 @@ class InjectorTest extends BaseTest
         $this->expectExceptionMessageContains("array key 0 not set array key 1 not set");
 
         $injector->make(
-            \Auryn\Test\PrefixDelegateTest::class,
+            \DI\Test\PrefixDelegateTest::class,
             [Injector::A_DEFINE . 'b' => []]
         );
     }
@@ -1429,11 +1429,11 @@ class InjectorTest extends BaseTest
         $this->expectExceptionMessageContains("array key 1 not set");
 
         $params = [
-            \Auryn\Test\PrefixDelegateTestDependencyInstantiable::class,
+            \DI\Test\PrefixDelegateTestDependencyInstantiable::class,
             2 => []
         ];
         $injector->make(
-            \Auryn\Test\PrefixDelegateTest::class,
+            \DI\Test\PrefixDelegateTest::class,
             [Injector::A_DEFINE . 'b' => $params]
         );
     }
@@ -1444,7 +1444,7 @@ class InjectorTest extends BaseTest
         $this->expectExceptionCode(Injector::E_INVOKABLE);
         $this->expectExceptionMessage(Injector::M_INVOKABLE);
         $injector->make(
-            \Auryn\Test\PrefixDelegateTest::class,
+            \DI\Test\PrefixDelegateTest::class,
             [Injector::A_DELEGATE . 'b' => 'this is not callable']
         );
     }

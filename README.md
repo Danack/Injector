@@ -65,16 +65,16 @@ caches any reflections it generates to minimize the potential performance impact
 
 ## Requirements and Installation
 
-- auryn requires PHP 5.3 or higher.
+- Danack/Injector requires PHP 7.2 or higher.
 
 #### Installation
 
 ###### Github
 
-You can clone the latest auryn iteration at anytime from the github repository:
+You can clone the latest Danack/Injector iteration at anytime from the github repository:
 
 ```bash
-$ git clone git://github.com/rdlowrey/auryn.git
+$ git clone git://github.com/danacj/injector.git
 ```
 
 ###### Composer
@@ -84,7 +84,7 @@ You may also use composer to include auryn as a dependency in your projects `com
 Alternatively require the package using composer cli:
 
 ```bash
-composer require rdlowrey/auryn
+composer require danack/injector
 ```
 
 ##### Manual Download
@@ -121,7 +121,7 @@ class:
 
 ```php
 <?php
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 ```
 
 ### Basic Instantiation
@@ -132,7 +132,7 @@ the following with equivalent results:
 
 ```php
 <?php
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $obj1 = new SomeNamespace\MyClass;
 $obj2 = $injector->make('SomeNamespace\MyClass');
 
@@ -161,7 +161,7 @@ class MyClass {
     }
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $myObj = $injector->make('MyClass');
 
 var_dump($myObj->dep1 instanceof SomeDependency); // true
@@ -195,7 +195,7 @@ class Engine {
     }
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $car = $injector->make('Car');
 var_dump($car instanceof Car); // true
 ```
@@ -232,7 +232,7 @@ ahead of time:
 
 ```php
 <?php
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->define('Car', ['engine' => 'V8']);
 $car = $injector->make('Car');
 
@@ -263,7 +263,7 @@ class MyClass {
     }
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->define('MyClass', ['arg2' => 'SomeImplementationClass']);
 
 $myObj = $injector->make('MyClass');
@@ -290,7 +290,7 @@ class MyClass {
     }
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $dependencyInstance = new SomeImplementation;
 $injector->define('MyClass', [':dependency' => $dependencyInstance]);
 
@@ -320,7 +320,7 @@ class MyClass {
     }
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $myObj = $injector->make('MyClass', ['dependency' => 'SomeImplementationClass']);
 
 var_dump($myObj instanceof MyClass); // true
@@ -351,7 +351,7 @@ class Car {
     }
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 
 // Tell the Injector class to inject an instance of V8 any time
 // it encounters an Engine type-hint
@@ -384,7 +384,7 @@ instance and define its scalar constructor parameters:
 
 ```php
 <?php
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->share('PDO');
 $injector->define('PDO', [
     ':dsn' => 'mysql:dbname=testdb;host=127.0.0.1',
@@ -425,7 +425,7 @@ class MyClass {
     }
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->defineParam('myValue', $myUniversalValue);
 $obj = $injector->make('MyClass');
 var_dump($obj->myValue === 42); // bool(true)
@@ -474,7 +474,7 @@ class MyController {
 
 $db = new PDO('mysql:host=localhost;dbname=mydb', 'user', 'pass');
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->share($db);
 
 $myController = $injector->make('MyController');
@@ -497,7 +497,7 @@ class Person {
     public $name = 'John Snow';
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->share('Person');
 
 $person = $injector->make('Person');
@@ -544,7 +544,7 @@ $complexClassFactory = function() {
     return $obj;
 };
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->delegate('MyComplexClass', $complexClassFactory);
 
 $obj = $injector->make('MyComplexClass');
@@ -622,7 +622,7 @@ var_dump($myObj->myProperty); // int(42)
 
 While the above example is contrived, the usefulness should be clear.
 
-Additionally, the prepare method is able to replace the object being prepared with another of the same or descendant type: 
+Additionally, the prepare method is able to replace the object being prepared with another of the same or descendant type:
 
 ```php
 <?php
@@ -639,7 +639,7 @@ class BarGreeter extends FooGreeter {
     }
 }
 
-$injector = new \Auryn\Injector();
+$injector = new \DI\Injector();
 
 $injector->prepare(FooGreeter::class, function($myObj, $injector) {
     return new BarGreeter();
@@ -660,7 +660,7 @@ The following examples all work:
 
 ```php
 <?php
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->execute(function(){});
 $injector->execute([$objectInstance, 'methodName']);
 $injector->execute('globalFunctionName');
@@ -687,7 +687,7 @@ class Example {
     }
 }
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 
 // outputs: int(42)
 var_dump($injector->execute('Example::myMethod', $args = [':arg2' => 42]));
@@ -838,7 +838,7 @@ context of the `Injector`:
 $pdo = new PDO('sqlite:some_sqlite_file.db');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 
 $injector->share($pdo);
 $mapper = $injector->make('SomeService');
@@ -895,7 +895,7 @@ $request = $requestDetector->detectFromSuperglobal($_SERVER);
 $requestUri = $request->getUri();
 $requestMethod = strtolower($request->getMethod());
 
-$injector = new Auryn\Injector;
+$injector = new DI\Injector;
 $injector->share($request);
 
 try {
@@ -958,11 +958,11 @@ Sometimes, the initialisation of the application is outside of your control. One
 You can still use Auryn by using a function to make a single instance of the injector:
 
 ```php
-function getAurynInjector()
+function getInjector()
 {
     static $injector = null;
 	if ($injector == null) {
-		$injector = new \Auryn\Injector();
+		$injector = new \DI\Injector();
 		// Do injector defines/shares/aliases/delegates here
 	}
 

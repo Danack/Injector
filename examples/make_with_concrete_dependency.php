@@ -1,6 +1,6 @@
 <?php
 
-use Auryn\Injector;
+use DI\Injector;
 
 require __DIR__ . "/../vendor/autoload.php";
 

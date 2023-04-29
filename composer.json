@@ -1,22 +1,10 @@
 {
-    "name": "rdlowrey/auryn",
-    "homepage": "https://github.com/rdlowrey/auryn",
-    "description": "Auryn is a dependency injector for bootstrapping object-oriented PHP applications.",
+    "name": "danack/injector",
+    "homepage": "https://github.com/Danack/Injector",
+    "description": "Danack/Injector is a recursive auto-wiring dependency injector.",
     "keywords": ["dependency injection", "dic", "ioc"],
     "license": "MIT",
     "authors": [
-        {
-            "name": "Daniel Lowrey",
-            "email": "rdlowrey@gmail.com",
-            "role": "Creator / Main Developer",
-            "homepage": "https://github.com/rdlowrey"
-        },
-        {
-            "name": "Levi Morrison",
-            "email": "levim@php.net",
-            "homepage": "http://morrisonlevi.github.com/",
-            "role": "Developer"
-        },
         {
             "name": "Dan Ackroyd",
             "email": "Danack@basereality.com",
@@ -34,12 +22,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Auryn\\": "lib/"
+            "DI\\": "lib/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Auryn\\Test\\": "test/"
+            "DI\\Test\\": "test/"
         },
         "files": ["test/fixtures.php"]
     }
