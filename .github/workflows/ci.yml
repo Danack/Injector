@@ -50,5 +50,24 @@ jobs:
       - name: "Run tests"
         run: vendor/bin/simple-phpunit
 
-#      - name: Execute benchmarks
-#        run: vendor/bin/phpbench run
+
+  benchmark:
+    name: "Benchmark on PHP ${{ matrix.php-version }}"
+
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v3
+
+      - name: "Install PHP with extensions"
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: "none"
+          php-version: ${{ matrix.php-version }}
+          ini-values: memory_limit=-1
+
+      - run: composer install
+
+      - name: Execute benchmarks
+        run: vendor/bin/phpbench run
