@@ -1385,4 +1385,31 @@ class InjectorTest extends BaseTest
         $this->assertInstanceOf(\NewInInitializer::class, $obj);
         $this->assertInstanceOf(\NewInInitializerDependency::class, $obj->instance);
     }
+
+    public function testErrorCodesAreUnique()
+    {
+        $rc = new \ReflectionClass(Injector::class);
+
+        $knownErrorConstantValues = [];
+        $constants = $rc->getConstants();
+        foreach ($constants as $constantName => $value) {
+
+            if (strpos($constantName, "E_") === false) {
+                continue;
+            }
+
+            if (array_key_exists($value, $knownErrorConstantValues) === true) {
+                $message = sprintf(
+                    "Error code %d is already used for %s, cannot re-use for %s",
+                    $value,
+                    $knownErrorConstantValues[$value],
+                    $constantName
+                );
+
+                $this->fail($message);
+
+            }
+            $knownErrorConstantValues[$value] = $constantName;
+        }
+    }
 }
