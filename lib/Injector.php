@@ -39,13 +39,16 @@ class Injector
     const E_DOUBLE_SHARE = 13;
     const M_DOUBLE_SHARE = "An instance of type %s has already been shared. Cannot share a second instance of the same type.";
 
-    const E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = 12;
+    const E_INVALID_STATIC_FACTORY = 14;
+    const M_INVALID_STATIC_FACTORY = "An instance of type %s has already been shared. Cannot share a second instance of the same type.";
+
+    const E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = 15;
     const M_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = "Define parameters needs to be an array with contents of {0:class-string, 1:array of injector params}. Value passed was of type '%s'.";
 
-    const E_INVALID_DEFINE_ARGUMENT_BAD_KEYS = 13;
+    const E_INVALID_DEFINE_ARGUMENT_BAD_KEYS = 16;
     const M_INVALID_DEFINE_ARGUMENT_BAD_KEYS = "Define parameters needs to be an array with contents of {0:class-string, 1:array of injector params}. %s.";
 
-    const E_SHARED_CONTEXT_FAILED = 14;
+    const E_SHARED_CONTEXT_FAILED = 17;
     const M_SHARED_CONTEXT_FAILED = "Making %s failed. Any type that is shared in an injector must have all information in that injector context, or have inherited it from the previous injector when it was separated. The info cannot be spread over different contexts. Original message: %s";
 
     protected $reflector;
