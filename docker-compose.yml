@@ -1,0 +1,23 @@
+version: "3"
+services:
+  developing:
+    build: containers/developing
+    environment:
+      - PHP_IDE_CONFIG=serverName=injectordebug
+    volumes:
+      - .:/var/app
+  # developing_8_2:
+  #   build: containers/developing_8_2
+  #   environment:
+  #     - PHP_IDE_CONFIG=serverName=typespecdebug
+  #   volumes:
+  #     - .:/var/app
+  # php_test:
+  #   build: containers/run_php_tests
+  #   volumes:
+  #     - .:/var/app
+
+  # phpcs:
+  #  build: containers/run_php_codesniffer
+  #  volumes:
+  #    - .:/var/app
