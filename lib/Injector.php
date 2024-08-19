@@ -39,17 +39,20 @@ class Injector
     const E_DOUBLE_SHARE = 13;
     const M_DOUBLE_SHARE = "An instance of type %s has already been shared. Cannot share a second instance of the same type.";
 
-    const E_INVALID_STATIC_FACTORY = 14;
-    const M_INVALID_STATIC_FACTORY = "An instance of type %s has already been shared. Cannot share a second instance of the same type.";
-
-    const E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = 15;
+    const E_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = 14;
     const M_INVALID_DEFINE_ARGUMENT_NOT_ARRAY = "Define parameters needs to be an array with contents of {0:class-string, 1:array of injector params}. Value passed was of type '%s'.";
 
-    const E_INVALID_DEFINE_ARGUMENT_BAD_KEYS = 16;
+    const E_INVALID_DEFINE_ARGUMENT_BAD_KEYS = 15;
     const M_INVALID_DEFINE_ARGUMENT_BAD_KEYS = "Define parameters needs to be an array with contents of {0:class-string, 1:array of injector params}. %s.";
 
-    const E_SHARED_CONTEXT_FAILED = 17;
+    const E_SHARED_CONTEXT_FAILED = 16;
     const M_SHARED_CONTEXT_FAILED = "Making %s failed. Any type that is shared in an injector must have all information in that injector context, or have inherited it from the previous injector when it was separated. The info cannot be spread over different contexts. Original message: %s";
+
+    const E_INVALID_STATIC_FACTORY = 17;
+    const M_INVALID_STATIC_FACTORY = "Expected interface and method but [%s, %s] has a problem: %s";
+
+    const E_STATIC_FACTORY_DUPLICATE = 18;
+    const M_STATIC_FACTORY_DUPLICATE = "Interface %s is already registered as a static factory";
 
     protected $reflector;
     private $classDefinitions = array();
@@ -59,6 +62,7 @@ class Injector
     private $prepares = array();
     private $delegates = array();
     protected $inProgressMakes = array();
+    protected $staticFactories = array();
 
     public function __construct(Reflector $reflector = null)
     {
@@ -78,7 +82,7 @@ class Injector
      * All objects/types that are shared in the original context will continue to be
      * made in/shared from the original context.
      *
-     * A side effect of that is that all shared objects that are created by the Auryn
+     * A side effect of that is that all shared objects that are created by the
      * injector need to have all their required dependencies/information in a single
      * context. That avoids any per-context information being accidentally fixed
      * and used across an application.
@@ -330,6 +334,51 @@ class Injector
     }
 
     /**
+     * @param string $interfaceName
+     * @param string $method
+     * @return void
+     */
+    public function staticFactory($interfaceName, $method)
+    {
+        if (interface_exists($interfaceName) === false) {
+            throw ConfigException::fromInvalidStaticFactory(
+                $interfaceName,
+                $method,
+                "Interface doesn't exist."
+            );
+        }
+
+        $rc = new \ReflectionClass($interfaceName);
+
+        if ($rc->hasMethod($method) !== true) {
+            throw ConfigException::fromInvalidStaticFactory(
+                $interfaceName,
+                $method,
+                "Method doesn't exist."
+            );
+        }
+
+        $rm = $rc->getMethod($method);
+        if ($rm->isStatic() === false) {
+            throw ConfigException::fromInvalidStaticFactory(
+                $interfaceName,
+                $method,
+                "Method isn't static"
+            );
+        }
+
+        $normalizedName = $this->normalizeName($interfaceName);
+
+        if (array_key_exists($normalizedName, $this->staticFactories) === true) {
+            throw ConfigException::staticFactoryAlreadyRegistered(
+                $interfaceName,
+            );
+        }
+
+        $this->staticFactories[$normalizedName] = $method;
+    }
+
+    /**
      * Retrieve stored data for the specified definition type
      *
      * Exposes introspection of existing binds/delegates/shares/etc for decoration and composition.
@@ -381,6 +430,42 @@ class Injector
 
         return array_key_exists($normalizedClass, $this->shares);
     }
+
+    public function calculateStaticFactoryInfo($className, $normalizedClass)
+    {
+        try {
+            $rc = new \ReflectionClass($className);
+            $classInterfaces = $rc->getInterfaceNames();
+
+            if (count($classInterfaces) === 0) {
+                return null;
+            }
+
+            foreach ($classInterfaces as $interfaceName) {
+                $normalizedInterface = $this->normalizeName($interfaceName);
+                if (array_key_exists($normalizedInterface, $this->staticFactories) === true) {
+                    $methodName = $this->staticFactories[$normalizedInterface];
+
+
+
+                    return [$normalizedClass, $methodName];
+                }
+            }
+
+            return null;
+
+        } catch (\ReflectionException $e) {
+            throw new InjectionException(
+                $this->inProgressMakes,
+                sprintf(self::M_MAKE_FAILURE, $className, $e->getMessage()),
+                self::E_MAKE_FAILURE,
+                $e
+            );
+        }
+
+    }
+
+
 
 
     /**
@@ -434,7 +519,15 @@ class Injector
                         self::E_MAKING_FAILED
                     );
                 }
-           } else {
+            }
+            else if (($static_factory_callable = $this->calculateStaticFactoryInfo($className, $normalizedClass)) !== null) {
+
+                // TODO - check is callable.
+
+                $obj = $this->execute($static_factory_callable);
+                // TODO - check correct type?
+            }
+            else {
                 $obj = $this->provisionInstance($className, $normalizedClass, $args);
             }
 

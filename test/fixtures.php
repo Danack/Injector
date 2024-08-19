@@ -846,3 +846,30 @@ class ExecutableHelper
 {
     public function foo() {}
 }
+
+interface StaticFactory
+{
+    static public function create();
+
+    // static private function privateCreate();
+
+    public function nonStaticCreate();
+}
+
+class ClassInterfaceStaticFactory implements StaticFactory
+{
+    // prevent direct construction
+    private function __construct()
+    {
+    }
+
+    static public function create()
+    {
+        return new self();
+    }
+
+    public function nonStaticCreate()
+    {
+        // not used.
+    }
+}

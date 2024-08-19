@@ -4,6 +4,7 @@ namespace DI\Test;
 
 use DI\Injector;
 use DI\InjectionException;
+use DI\ConfigException;
 
 class InjectorTest extends BaseTest
 {
@@ -1384,6 +1385,71 @@ class InjectorTest extends BaseTest
 
         $this->assertInstanceOf(\NewInInitializer::class, $obj);
         $this->assertInstanceOf(\NewInInitializerDependency::class, $obj->instance);
+    }
+
+    public function testStaticFactoryThroughInterface()
+    {
+        $injector = new Injector;
+        $injector->staticFactory(StaticFactory::class, "create");
+
+        $obj = $injector->make(ClassInterfaceStaticFactory::class);
+        $this->assertInstanceOf(ClassInterfaceStaticFactory::class, $obj);
+    }
+
+
+    public function testStaticFactoryThroughInterface_ErrorsNonExistentInterface()
+    {
+        $injector = new Injector;
+        $this->expectExceptionCode(Injector::E_INVALID_STATIC_FACTORY);
+        $this->expectExceptionMessageMatchesTemplateString(Injector::M_INVALID_STATIC_FACTORY);
+        $injector->staticFactory(NonExistent::class, "create");
+    }
+
+
+
+    public function testStaticFactoryThroughInterface_ErrorsDuplicate()
+    {
+        $injector = new Injector;
+        $injector->staticFactory(StaticFactory::class, "create");
+
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionCode(Injector::E_STATIC_FACTORY_DUPLICATE);
+        $this->expectExceptionMessageMatchesTemplateString(Injector::M_STATIC_FACTORY_DUPLICATE);
+
+        $injector->staticFactory(StaticFactory::class, "create");
+    }
+
+
+    public function testStaticFactoryForClassErrorsInvalidCallable()
+    {
+        $injector = new Injector;
+
+        $this->expectExceptionCode(Injector::E_INVALID_STATIC_FACTORY);
+        $this->expectExceptionMessageMatchesTemplateString(Injector::M_INVALID_STATIC_FACTORY);
+        $injector->staticFactory(StaticFactory::class, "bad_method_name");
+    }
+
+    public function testStaticFactoryForClassErrorsNonStaticMethod()
+    {
+        $injector = new Injector;
+
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionCode(Injector::E_INVALID_STATIC_FACTORY);
+        $this->expectExceptionMessageMatchesTemplateString(Injector::M_INVALID_STATIC_FACTORY);
+
+        $injector->staticFactory(StaticFactory::class, "nonStaticCreate");
+    }
+
+    public function testStaticFactoryForClassErrorsNonPublicMethod()
+    {
+        $injector = new Injector;
+
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionCode(Injector::E_INVALID_STATIC_FACTORY);
+        $this->expectExceptionMessageMatchesTemplateString(Injector::M_INVALID_STATIC_FACTORY);
+
+        $injector->staticFactory(StaticFactory::class, "privateCreate");
+        $injector->make(ClassInterfaceStaticFactory::class);
     }
 
     public function testErrorCodesAreUnique()
