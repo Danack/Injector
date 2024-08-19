@@ -371,7 +371,7 @@ class Injector
 
         if (array_key_exists($normalizedName, $this->staticFactories) === true) {
             throw ConfigException::staticFactoryAlreadyRegistered(
-                $interfaceName,
+                $interfaceName
             );
         }
 
