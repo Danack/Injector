@@ -14,14 +14,6 @@ class InjectionException extends InjectorException
         parent::__construct($message, $code, $previous);
     }
 
-    public static function contextError($dependencyChain, $message, $code, \Exception $previous)
-    {
-        $instance = new self([]);
-        $instance->__construct($message, $code, $previous);
-        $instance->dependencyChain = $dependencyChain;
-        return $instance;
-    }
-
     /**
      * If PHP had package based privacy rules, this could be package private
      * or this could be 'just' a function.
