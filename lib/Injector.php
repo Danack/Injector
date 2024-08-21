@@ -54,6 +54,9 @@ class Injector
     const E_STATIC_FACTORY_DUPLICATE = 18;
     const M_STATIC_FACTORY_DUPLICATE = "Interface %s is already registered as a static factory";
 
+    const E_STATIC_FACTORY_WRONG_RETURN_TYPE = 19;
+    const M_STATIC_FACTORY_WRONG_RETURN_TYPE = "Static factory returned wrong type needs to be %s but is %s.";
+
     protected $reflector;
     private $classDefinitions = array();
     private $paramDefinitions = array();
@@ -334,6 +337,8 @@ class Injector
     }
 
     /**
+     *
+     *
      * @param string $interfaceName
      * @param string $method
      * @return void
@@ -431,42 +436,21 @@ class Injector
         return array_key_exists($normalizedClass, $this->shares);
     }
 
+    /**
+     * Determine if a type can be created through a registered static factory.
+     * @param $className
+     * @param $normalizedClass
+     * @return array|null
+     */
     public function calculateStaticFactoryInfo($className, $normalizedClass)
     {
-        try {
-            $rc = new \ReflectionClass($className);
-            $classInterfaces = $rc->getInterfaceNames();
-
-            if (count($classInterfaces) === 0) {
-                return null;
+        foreach ($this->staticFactories as $type => $methodName) {
+            if (is_a($className, $type, true) === true) {
+                return [$normalizedClass, $methodName];
             }
-
-            foreach ($classInterfaces as $interfaceName) {
-                $normalizedInterface = $this->normalizeName($interfaceName);
-                if (array_key_exists($normalizedInterface, $this->staticFactories) === true) {
-                    $methodName = $this->staticFactories[$normalizedInterface];
-
-
-
-                    return [$normalizedClass, $methodName];
-                }
-            }
-
-            return null;
-
-        } catch (\ReflectionException $e) {
-            throw new InjectionException(
-                $this->inProgressMakes,
-                sprintf(self::M_MAKE_FAILURE, $className, $e->getMessage()),
-                self::E_MAKE_FAILURE,
-                $e
-            );
         }
-
+        return null;
     }
-
-
-
 
     /**
      * Instantiate/provision a class instance
@@ -521,11 +505,18 @@ class Injector
                 }
             }
             else if (($static_factory_callable = $this->calculateStaticFactoryInfo($className, $normalizedClass)) !== null) {
-
-                // TODO - check is callable.
-
                 $obj = $this->execute($static_factory_callable);
-                // TODO - check correct type?
+                if (is_a($obj, $className, true) !== true) {
+                    throw new InjectionException(
+                        $this->inProgressMakes,
+                        sprintf(
+                            self::M_STATIC_FACTORY_WRONG_RETURN_TYPE,
+                            $className,
+                            gettype($obj)
+                        ),
+                        self::E_STATIC_FACTORY_WRONG_RETURN_TYPE
+                    );
+                }
             }
             else {
                 $obj = $this->provisionInstance($className, $normalizedClass, $args);

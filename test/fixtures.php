@@ -870,6 +870,24 @@ class ClassInterfaceStaticFactory implements StaticFactory
 
     public function nonStaticCreate()
     {
-        // not used.
+        // not called.
+    }
+}
+
+class IncorrectInterfaceStaticFactory implements StaticFactory
+{
+    // prevent direct construction
+    private function __construct()
+    {
+    }
+
+    static public function create()
+    {
+        return new \StdClass();
+    }
+
+    public function nonStaticCreate()
+    {
+        // not called.
     }
 }

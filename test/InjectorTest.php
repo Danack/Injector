@@ -1387,6 +1387,9 @@ class InjectorTest extends BaseTest
         $this->assertInstanceOf(\NewInInitializerDependency::class, $obj->instance);
     }
 
+    /**
+     * @group wip
+     */
     public function testStaticFactoryThroughInterface()
     {
         $injector = new Injector;
@@ -1419,6 +1422,18 @@ class InjectorTest extends BaseTest
         $injector->staticFactory(StaticFactory::class, "create");
     }
 
+    public function testStaticFactoryThroughInterface_ErrorsIncorrectType()
+    {
+        $injector = new Injector;
+
+        $injector->staticFactory(StaticFactory::class, "create");
+
+        $this->expectException(InjectionException::class);
+        $this->expectExceptionCode(Injector::E_STATIC_FACTORY_WRONG_RETURN_TYPE);
+        $this->expectExceptionMessageMatchesTemplateString(Injector::M_STATIC_FACTORY_WRONG_RETURN_TYPE);
+
+        $injector->make(IncorrectInterfaceStaticFactory::class);
+    }
 
     public function testStaticFactoryForClassErrorsInvalidCallable()
     {
