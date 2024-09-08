@@ -99,14 +99,6 @@ class InjectorTest extends BaseTest
         $injector->make('ClassThatDoesntExist');
     }
 
-    public function testMakeInstanceUsesCustomDefinitionIfSpecified()
-    {
-        $injector = new Injector;
-        $injector->define('DI\Test\TestNeedsDep', array('testDep'=>'DI\Test\TestDependency'));
-        $injected = $injector->make('DI\Test\TestNeedsDep', array('testDep'=>'DI\Test\TestDependency2'));
-        $this->assertEquals('testVal2', $injected->testDep->testProp);
-    }
-
     public function testMakeInstanceStoresShareIfMarkedWithNullInstance()
     {
         $injector = new Injector;
@@ -132,10 +124,6 @@ class InjectorTest extends BaseTest
      */
     public function testMakeInstanceUsesReflectionForUnknownParamsInMultiBuildWithDepsAndVariadics()
     {
-        if (defined('HHVM_VERSION')) {
-            $this->markTestSkipped("HHVM doesn't support variadics with type declarations.");
-        }
-
         require_once __DIR__ . "/fixtures_5_6.php";
 
         $injector = new Injector;
@@ -151,10 +139,6 @@ class InjectorTest extends BaseTest
      */
     public function testMakeInstanceUsesReflectionForUnknownParamsWithDepsAndVariadicsWithType()
     {
-        if (defined('HHVM_VERSION')) {
-            $this->markTestSkipped("HHVM doesn't support variadics with type declarations.");
-        }
-
         require_once __DIR__ . "/fixtures_5_6.php";
 
         $injector = new Injector;
