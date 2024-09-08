@@ -617,14 +617,9 @@ class Injector implements DependencyHierarchy
     private function provisionFuncArgs(
         \ReflectionFunctionAbstract $reflFunc,
         array $definition,
-        array $reflParams = null
+        array $reflParams
     ) {
         $args = array();
-
-        // @TODO store this in ReflectionStorage
-        if (!isset($reflParams)) {
-            $reflParams = $reflFunc->getParameters();
-        }
 
         foreach ($reflParams as $i => $reflParam) {
             $name = $reflParam->name;
