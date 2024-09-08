@@ -1347,6 +1347,24 @@ class InjectorTest extends BaseTest
         $injector->share(new \StdClass);
     }
 
+    /**
+     * @return void
+     * @throws InjectionException
+     * @throws \DI\ConfigException
+     */
+    public function testDependencyChainInjectionWorks()
+    {
+        $injector = new Injector;
+        $injector->delegate(SomeLogger::class, 'DI\Test\createsLogger');
+
+        $injector->alias(\DI\DependencyHierarchy::class, Injector::class);
+        $injector->share($injector);
+
+        $obj = $injector->make(ClassWithTwoDifferentDependencies::class);
+
+        $this->assertSame("error", $obj->instanceIsWorkingFine->logger->logLevel);
+        $this->assertSame("info", $obj->instanceThatNeedsDebugging->logger->logLevel);
+    }
 
     /**
      * This test is duplication of other tests. It is present to check

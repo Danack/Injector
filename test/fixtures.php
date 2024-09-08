@@ -2,6 +2,8 @@
 
 namespace DI\Test;
 
+use DI\DependencyHierarchy;
+
 class InaccessibleExecutableClassMethod
 {
     private function doSomethingPrivate()
@@ -773,6 +775,67 @@ class ThrowsExceptionInConstructor {
         throw new \Exception('Exception in constructor');
     }
 }
+
+class SomeLogger
+{
+    public string $logLevel;
+
+    public function __construct(string $logLevel)
+    {
+        $this->logLevel = $logLevel;
+    }
+}
+
+class ClassThatIsWorkingFine
+{
+    public SomeLogger $logger;
+
+    public function __construct(SomeLogger $logger)
+    {
+        $this->logger = $logger;
+    }
+}
+
+class ClassThatNeedsDebugging
+{
+    public SomeLogger $logger;
+
+    public function __construct(SomeLogger $logger)
+    {
+        $this->logger = $logger;
+    }
+}
+
+class ClassWithTwoDifferentDependencies
+{
+    public ClassThatIsWorkingFine $instanceIsWorkingFine;
+    public ClassThatNeedsDebugging $instanceThatNeedsDebugging;
+
+    public function __construct(
+        ClassThatIsWorkingFine $instanceIsWorkingFine,
+        ClassThatNeedsDebugging $instanceThatNeedsDebugging
+    ) {
+        $this->instanceThatNeedsDebugging = $instanceThatNeedsDebugging;
+        $this->instanceIsWorkingFine = $instanceIsWorkingFine;
+    }
+}
+
+/**
+ * This returns a different logger by looking at which class has it as a dependency.
+ *
+ * @param DependencyHierarchy $dependencyHierarchy
+ * @return SomeLogger
+ */
+function createsLogger(DependencyHierarchy $dependencyHierarchy)
+{
+    foreach ($dependencyHierarchy->getInProgressMakes() as $type => $index) {
+        if (strcasecmp(ClassThatNeedsDebugging::class, $type) === 0) {
+            return new SomeLogger("info");
+        }
+    }
+    return new SomeLogger("error");
+}
+
 
 class ExtendedArrayObject extends \ArrayObject {}
 class ExtendedExtendedArrayObject extends ExtendedArrayObject {}

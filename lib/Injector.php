@@ -2,7 +2,7 @@
 
 namespace DI;
 
-class Injector
+class Injector implements DependencyHierarchy
 {
     const I_BINDINGS = 1;
     const I_DELEGATES = 2;
@@ -75,6 +75,11 @@ class Injector
     public function __clone()
     {
         $this->inProgressMakes = array();
+    }
+
+    public function getInProgressMakes()
+    {
+        return $this->inProgressMakes;
     }
 
     /**
