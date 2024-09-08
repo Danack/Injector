@@ -2,6 +2,9 @@
 
 namespace DI;
 
+/**
+ * This type of exception can happen during configuration of the injector.
+ */
 class ConfigException extends InjectorException
 {
     /**

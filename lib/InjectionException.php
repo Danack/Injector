@@ -2,6 +2,10 @@
 
 namespace DI;
 
+/**
+ * This type of exception can happen when the injector is being used to
+ * create objects or execute a callable.
+ */
 class InjectionException extends InjectorException
 {
     public $dependencyChain;
