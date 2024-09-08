@@ -1162,6 +1162,19 @@ class InjectorTest extends BaseTest
         $this->assertSame($expected, $actual);
     }
 
+    public function testCoverage_provisionFuncArgsSimple()
+    {
+        $injector = new Injector();
+
+        $fn = function (int ...$bar) {
+            return func_num_args();
+        };
+
+
+        $result = $injector->execute($fn);
+        $this->assertSame(0, $result);
+    }
+
     public function testSeparationWorks_with_shared_class()
     {
         $injector = new Injector();
