@@ -107,18 +107,6 @@ class InjectorTest extends BaseTest
         $this->assertEquals('testVal2', $injected->testDep->testProp);
     }
 
-    /**
-     * @group deadish
-     */
-    public function testMakeInstanceCustomDefinitionOverridesExistingDefinitions()
-    {
-        $injector = new Injector;
-        $injector->define('DI\Test\InjectorTestChildClass', array(':arg1'=>'First argument', ':arg2'=>'Second argument'));
-        $injected = $injector->make('DI\Test\InjectorTestChildClass', array(':arg1'=>'Override'));
-        $this->assertEquals('Override', $injected->arg1);
-        $this->assertEquals('Second argument', $injected->arg2);
-    }
-
     public function testMakeInstanceStoresShareIfMarkedWithNullInstance()
     {
         $injector = new Injector;
@@ -234,32 +222,6 @@ class InjectorTest extends BaseTest
 
         $injector->alias('DI\Test\TestNoExplicitDefine', 'DI\Test\ProviderTestCtorParamWithNoTypeOrDefault');
         $obj = $injector->make('DI\Test\ProviderTestCtorParamWithNoTypeOrDefaultDependent');
-    }
-
-    /**
-     * @group deadish
-     */
-    public function testMakeInstanceInjectsRawParametersDirectly()
-    {
-        $injector = new Injector;
-        $injector->define('DI\Test\InjectorTestRawCtorParams', array(
-            ':string' => 'string',
-            ':obj' => new \StdClass,
-            ':int' => 42,
-            ':array' => array(),
-            ':float' => 9.3,
-            ':bool' => true,
-            ':null' => null,
-        ));
-
-        $obj = $injector->make('DI\Test\InjectorTestRawCtorParams');
-        $this->assertIsString($obj->string);
-        $this->assertInstanceOf('StdClass', $obj->obj);
-        $this->assertIsInt($obj->int);
-        $this->assertIsArray($obj->array);
-        $this->assertIsFloat($obj->float);
-        $this->assertIsBool($obj->bool);
-        $this->assertNull($obj->null);
     }
 
     public function testMakeInstanceThrowsExceptionWhenDelegateDoes()
@@ -457,7 +419,6 @@ class InjectorTest extends BaseTest
 
     /**
      * @dataProvider provideExecutionExpectations
-     * @group deadish
      */
     public function testProvisionedInvokables($toInvoke, $definition, $expectedResult)
     {
@@ -499,103 +460,96 @@ class InjectorTest extends BaseTest
 
         // 4 -------------------------------------------------------------------------------------->
 
-        $toInvoke = array('DI\Test\ExecuteClassDepsWithMethodDeps', 'execute');
-        $args = array(':arg' => 9382);
-        $expectedResult = 9382;
-        $return[] = array($toInvoke, $args, $expectedResult);
-
-        // 5 -------------------------------------------------------------------------------------->
-
         $toInvoke = array('DI\Test\ExecuteClassStaticMethod', 'execute');
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 6 -------------------------------------------------------------------------------------->
+        // 5 -------------------------------------------------------------------------------------->
 
         $toInvoke = array(new ExecuteClassStaticMethod, 'execute');
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 7 -------------------------------------------------------------------------------------->
+        // 6 -------------------------------------------------------------------------------------->
 
         $toInvoke = 'DI\Test\ExecuteClassStaticMethod::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 8 -------------------------------------------------------------------------------------->
+        // 7 -------------------------------------------------------------------------------------->
 
         $toInvoke = array('DI\Test\ExecuteClassRelativeStaticMethod', 'parent::execute');
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 9 -------------------------------------------------------------------------------------->
+        // 8 -------------------------------------------------------------------------------------->
 
         $toInvoke = 'DI\Test\testExecuteFunction';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 10 ------------------------------------------------------------------------------------->
+        // 9 -------------------------------------------------------------------------------------->
 
         $toInvoke = function () { return 42; };
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 11 ------------------------------------------------------------------------------------->
+        // 10 ------------------------------------------------------------------------------------->
 
         $toInvoke = new ExecuteClassInvokable;
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 12 ------------------------------------------------------------------------------------->
+        // 11 ------------------------------------------------------------------------------------->
 
         $toInvoke = 'DI\Test\ExecuteClassInvokable';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 13 ------------------------------------------------------------------------------------->
+        // 12 ------------------------------------------------------------------------------------->
 
         $toInvoke = 'DI\Test\ExecuteClassNoDeps::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 14 ------------------------------------------------------------------------------------->
+        // 13 ------------------------------------------------------------------------------------->
 
         $toInvoke = 'DI\Test\ExecuteClassDeps::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 15 ------------------------------------------------------------------------------------->
+        // 14 ------------------------------------------------------------------------------------->
 
         $toInvoke = 'DI\Test\ExecuteClassStaticMethod::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 16 ------------------------------------------------------------------------------------->
+        // 15 ------------------------------------------------------------------------------------->
 
         $toInvoke = 'DI\Test\ExecuteClassRelativeStaticMethod::parent::execute';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 17 ------------------------------------------------------------------------------------->
+        // 16 ------------------------------------------------------------------------------------->
 
         $toInvoke = 'DI\Test\testExecuteFunctionWithArg';
         $args = array();
         $expectedResult = 42;
         $return[] = array($toInvoke, $args, $expectedResult);
 
-        // 18 ------------------------------------------------------------------------------------->
+        // 17 ------------------------------------------------------------------------------------->
 
         $toInvoke = function () {
             return 42;
@@ -606,7 +560,7 @@ class InjectorTest extends BaseTest
 
 
         if (PHP_VERSION_ID > 50400) {
-            // 19 ------------------------------------------------------------------------------------->
+            // 18 ------------------------------------------------------------------------------------->
 
             $object = new \DI\Test\ReturnsCallable('new value');
             $args = array();
@@ -971,17 +925,6 @@ class InjectorTest extends BaseTest
         $injector->alias('DI\Test\DepInterface', 'DI\Test\DepImplementation');
     }
 
-    /**
-     * @group deadish
-     */
-    public function testDefineWithBackslashAndMakeWithoutBackslash()
-    {
-        $injector = new Injector();
-        $injector->define('DI\Test\SimpleNoTypeClass', array(':arg' => 'tested'));
-        $testClass = $injector->make('DI\Test\SimpleNoTypeClass');
-        $this->assertEquals('tested', $testClass->testParam);
-    }
-
     public function testShareWithBackslashAndMakeWithoutBackslash()
     {
         $injector = new Injector();
@@ -1017,7 +960,6 @@ class InjectorTest extends BaseTest
     }
 
 
-
     /**
      * Test that custom definitions are not passed through to dependencies.
      * Surprising things would happen if this did occur.
@@ -1032,6 +974,7 @@ class InjectorTest extends BaseTest
         $this->expectExceptionMessage('No definition available to provision typeless parameter $foo at position 0 in DI\Test\DependencyWithDefinedParam::__construct() declared in DI\Test\DependencyWithDefinedParam::');
         $this->expectExceptionCode(\DI\Injector::E_UNDEFINED_PARAM);
 
+        // This test may be bogus as the library does not support injection prefixes such as ':'
         $injector->make('DI\Test\RequiresDependencyWithDefinedParam', array(':foo' => 5));
     }
 
@@ -1218,49 +1161,6 @@ class InjectorTest extends BaseTest
         $actual = $injector->make("DI\Test\SomeImplementation");
         $this->assertSame($expected, $actual);
     }
-
-    /**
-     * @group deadish
-     */
-    public function testChildWithoutConstructorWorks() {
-
-        $injector = new Injector;
-        try {
-            $injector->define('DI\Test\ParentWithConstructor', array(':foo' => 'parent'));
-            $injector->define('DI\Test\ChildWithoutConstructor', array(':foo' => 'child'));
-
-            $injector->share('DI\Test\ParentWithConstructor');
-            $injector->share('DI\Test\ChildWithoutConstructor');
-
-            $child = $injector->make('DI\Test\ChildWithoutConstructor');
-            $this->assertEquals('child', $child->foo);
-
-            $parent = $injector->make('DI\Test\ParentWithConstructor');
-            $this->assertEquals('parent', $parent->foo);
-        }
-        catch (\DI\InjectionException $ie) {
-            echo $ie->getMessage();
-            $this->fail("Injector failed to locate the ");
-        }
-    }
-
-//    public function testWhySeparationIsNeeded()
-//    {
-//        $injector = new Injector();
-//        $message = "shared instance has one off message";
-//
-//        // Declare a class as shared
-//        $injector->share(SharedClassInInjector::class);
-//        // Create an instance with one-off variables. The object is created.
-//        $obj1 = $injector->make(SharedClassInInjector::class, [':message' => $message]);
-//
-//        // Create another instance... but as it is shared, the previous
-//        // 'one-off' message is used.
-//        $obj2 = $injector->make(SharedClassInInjector::class, [':message' => "This doesn't get used"]);
-//
-//        $this->assertSame($message, $obj1->getMessage());
-//        $this->assertSame($message, $obj2->getMessage());
-//    }
 
     public function testSeparationWorks_with_shared_class()
     {
