@@ -436,7 +436,7 @@ class Injector implements DependencyHierarchy
 
     public function isKnownSharedType(string $name): bool
     {
-        list($className, $normalizedClass) = $this->resolveAlias($name);
+        list($_className, $normalizedClass) = $this->resolveAlias($name);
 
         return array_key_exists($normalizedClass, $this->shares);
     }
@@ -495,7 +495,7 @@ class Injector implements DependencyHierarchy
             if (isset($this->delegates[$normalizedClass])) {
                 $executable = $this->buildExecutable($this->delegates[$normalizedClass]);
                 $reflectionFunction = $executable->getCallableReflection();
-                $args = $this->provisionFuncArgsSimple($reflectionFunction, $className);
+                $args = $this->provisionFuncArgsSimple($reflectionFunction);
                 $obj = call_user_func_array(array($executable, '__invoke'), $args);
                 if (!($obj instanceof $normalizedClass)) {
                     throw new InjectionException(
@@ -560,7 +560,7 @@ class Injector implements DependencyHierarchy
                 $definition = isset($this->classDefinitions[$normalizedClass])
                     ? array_replace($this->classDefinitions[$normalizedClass], $definition)
                     : $definition;
-                $args = $this->provisionFuncArgs($ctor, $definition, $ctorParams/*, $className*/);
+                $args = $this->provisionFuncArgs($ctor, $definition, $ctorParams);
                 $obj = $reflClass->newInstanceArgs($args);
             } else {
                 $obj = $this->instantiateWithoutCtorParams($className);
@@ -617,8 +617,7 @@ class Injector implements DependencyHierarchy
     private function provisionFuncArgs(
         \ReflectionFunctionAbstract $reflFunc,
         array $definition,
-        array $reflParams = null,
-        $className = null
+        array $reflParams = null
     ) {
         $args = array();
 
@@ -755,7 +754,7 @@ class Injector implements DependencyHierarchy
         list($reflFunc, $invocationObj) = $this->buildExecutableStruct($callableOrMethodStr);
         $executable = new Executable($reflFunc, $invocationObj);
 
-        $args = $this->provisionFuncArgsSimple($reflFunc/*, $invocationObj === null ? null : get_class($invocationObj)*/);
+        $args = $this->provisionFuncArgsSimple($reflFunc);
 
         return call_user_func_array(array($executable, '__invoke'), $args);
     }
