@@ -600,7 +600,7 @@ class Injector implements DependencyHierarchy
 
         foreach ($reflParams as $i => $reflParam) {
             if (!$arg = $this->buildArgFromType($reflFunc, $reflParam)) {
-                $arg = $this->buildArgFromReflParam($reflParam/*, $className*/);
+                $arg = $this->buildArgFromReflParam($reflParam);
                 if ($arg === null && ($reflParam->isVariadic() || $reflParam->isOptional())) {
                     // buildArgFromReflParam might return null in case the parameter is optional
                     // in case of variadics, the parameter is optional, but null might not be allowed
