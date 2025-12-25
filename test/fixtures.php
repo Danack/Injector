@@ -530,7 +530,7 @@ class TestMissingDependency
 class NonConcreteDependencyWithDefaultValue
 {
     public $interface;
-    public function __construct(DelegatableInterface $i = null)
+    public function __construct(DelegatableInterface|null $i = null)
     {
         $this->interface = $i;
     }
@@ -540,7 +540,7 @@ class NonConcreteDependencyWithDefaultValue
 class ConcreteDependencyWithDefaultValue
 {
     public $dependency;
-    public function __construct(\StdClass $instance = null)
+    public function __construct(\StdClass|null $instance = null)
     {
         $this->dependency = $instance;
     }

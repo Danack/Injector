@@ -67,7 +67,7 @@ class Injector implements DependencyHierarchy
     protected $inProgressMakes = array();
     protected $staticFactories = array();
 
-    public function __construct(Reflector $reflector = null)
+    public function __construct(Reflector|null $reflector = null)
     {
         $this->reflector = $reflector ?: new CachingReflector;
     }

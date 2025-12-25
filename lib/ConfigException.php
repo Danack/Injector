@@ -12,7 +12,7 @@ class ConfigException extends InjectorException
      */
     public static function fromInvalidCallable(
         $callableOrMethodStr,
-        \Exception $previous = null
+        \Exception|null $previous = null
     ) {
 
         $message = InjectionException::getInvalidCallableMessage(

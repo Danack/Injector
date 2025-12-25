@@ -30,7 +30,7 @@ class DefaultNullDependency
 {
     public ?Dependency $instance;
 
-    public function __construct(Dependency $instance = null)
+    public function __construct(Dependency|null $instance = null)
     {
         $this->instance = $instance;
     }
